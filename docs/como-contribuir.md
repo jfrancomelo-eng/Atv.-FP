@@ -17,7 +17,7 @@ Use o mesmo e-mail da sua conta do GitHub. Sem isso, o commit não aparece ligad
 ## 2. Pegue o repositório e altere a sua parte
 
 ```bash
-git clone https://github.com/<usuario-ou-organizacao>/conde-avisa.git
+git clone https://github.com/jfrancomelo-eng/Atv.-FP.git
 ```
 
 Edite a sua parte no `README.md` (ver tabela da seção 9) e preencha a sua linha na seção 10.
@@ -48,7 +48,7 @@ Co-authored-by: Nome do Colega <email-do-colega@github.com>
 
 ## 5. Pegue o link do commit
 
-No GitHub, abra **Commits**, clique no seu commit e copie a URL, no formato `https://github.com/<org>/conde-avisa/commit/<código>`.
+No GitHub, abra **Commits**, clique no seu commit e copie a URL, no formato `https://github.com/jfrancomelo-eng/Atv.-FP/commit/<código>`.
 
 ## 6. O que enviar no Classroom
 

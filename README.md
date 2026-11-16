@@ -17,7 +17,7 @@
 | Integrantes | Juan (coordenação e riscos) · Luiz Barreto (redação e defesa) · Arthur e Rafael (curadoria dos avisos) · Berto e Heitor (campo) · Breno (dados e análise) |
 | Turma e docente | AdmTech, José Adeilmo Nunes Barbosa Junior |
 | Versão e data | Planejamento da v0.1, 16/11/2026 |
-| Repositório | `https://github.com/<usuario-ou-organizacao>/conde-avisa` *(preencher; acesso de leitura liberado ao docente)* |
+| Repositório | https://github.com/jfrancomelo-eng/Atv.-FP (acesso de leitura liberado ao docente) |
 
 ---
 
@@ -181,7 +181,7 @@ Aviso-base dos exemplos *(fictício)*: desvio da CTTU na Rua do Hospício, linha
 ### Estrutura do repositório
 
 ```
-conde-avisa/
+Atv.-FP/
 ├── main.py                  # menu do plantonista (RF01-RF09)
 ├── conde_avisa/
 │   ├── regras.py            # RN01-RN06, RN08, RN09: validação, checagem, antecedência
@@ -242,7 +242,7 @@ Cada integrante diz o que escreveu ou revisou, cita os IDs e explica como confer
 
 | Integrante (GitHub) | Contribuição | Como conferiu | Commit |
 |---|---|---|---|
-| Juan `@____` | T06 e T11: repositório, RNF, backlog, menu e CSV. | Abriu o CSV no Excel e conferiu o acesso do docente. | `https://github.com/.../commit/...` |
+| Juan `@jfrancomelo-eng` | T06 e T11: repositório, RNF, backlog, menu e CSV. | Abriu o CSV no Excel e conferiu o acesso do docente. | https://github.com/jfrancomelo-eng/Atv.-FP/commit/511d407 |
 | Luiz Barreto `@____` | T01: visão geral, usuário, recorte e história de usuário. | Conferiu se o recorte segue a devolutiva (foco informacional). | |
 | Arthur `@____` | T02 e T08: RF01–RF04 e RN01–RN06. | Testou fonte, parada e checagem inválidas (CA02, CA03, CA07). | |
 | Rafael `@____` | T03 e T09: boletim, RN07 e AC01–AC05. | Ouviu o boletim com leitor de tela no celular. | |
