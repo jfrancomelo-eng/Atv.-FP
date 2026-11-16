@@ -6,7 +6,7 @@
 **Etapa:** 17/11/2026 — definições e planejamento
 **Lente:** 7 · Última Milha do Trabalho e do Estudo (Projeto Integrador — Mobilidade Urbana no Recife)
 
-> Este documento adapta o modelo da cafeteria ao projeto da equipe. Ele parte do que foi definido nos Artefatos I, II e III e na devolutiva do Artefato II. Os dados de avisos usados nos exemplos são **fictícios** e estão marcados assim.
+Base: Artefatos I, II e III e devolutiva do Artefato II. Os avisos usados nos exemplos são **fictícios**.
 
 ### Identificação do grupo
 
@@ -189,7 +189,7 @@ Atv.-FP/
 │   └── dados.py             # RF09 / RN11: leitura e gravação do CSV
 ├── tests/test_conde_avisa.py  # CA01-CA14
 ├── dados/exemplo.csv        # 3 avisos FICTÍCIOS para demonstração
-└── docs/                    # documento .docx e guia de contribuição
+└── docs/                    # documento .docx
 ```
 
 ### Como executar
@@ -238,7 +238,7 @@ As tarefas com previsão para 23/11 formam o plano de implementação da v0.1.
 
 ### Evidências de autoria e coautoria
 
-Cada integrante diz o que escreveu ou revisou, cita os IDs e explica como conferiu. Cole ao menos **uma URL completa de commit** por pessoa (veja `docs/como-contribuir.md`).
+Cada integrante diz o que escreveu ou revisou, cita os IDs e explica como conferiu. Cada pessoa indica ao menos um commit de autoria ou coautoria.
 
 | Integrante (GitHub) | Contribuição | Como conferiu | Commit |
 |---|---|---|---|
@@ -264,26 +264,3 @@ Se duas pessoas usarem o mesmo commit, registrem a coautoria e o papel de cada u
 | Lacuna: o modelo pede acessibilidade, e os artefatos não tratavam disso. | Seção 6: boletim legível por leitor de tela, rótulos, siglas explicadas e cartaz com link escrito. |
 | Lacuna: dados pessoais dos participantes. | A RN11 proíbe guardar dados de passageiros. |
 | **Achado novo:** o prazo útil do pico das 7h é 6h00, e o boletim sai às 6h30. | Para o pico da manhã, o canal só ajuda com avisos que já saíram no boletim da véspera. Isso reforça o boletim de véspera da fase 2 e a apoptose do horário fixo (Artefato III, Pilar 2). **Decisão pendente:** antecipar os boletins (ex.: 5h45 e 15h45) ou criar o boletim das 20h. |
-
-## 12. Envio e avaliação
-
-- **No repositório:** este README, o documento `.docx` em `docs/` e o código, com acesso de leitura liberado ao docente.
-- **No Classroom (até 16/11/2026, 23h59):** cada integrante envia o link do seu commit, um resumo do que fez e como conferir, o link do repositório e o documento final da equipe.
-- **Na apresentação de 17/11:** a equipe explica o recorte e a v0.1. Cada integrante explica sua contribuição e responde a uma pergunta sobre as definições.
-- **Valor:** 3,5 pontos, sendo 1,5 coletivo e 2,0 individual.
-
-**Exemplo de fala individual (Breno).** "O relatório separa fonte e canal porque a devolutiva perguntou se o problema é o canal ou o dado público. No CA12, a fonte publicou às 5h50, a tempo. O canal publicou às 6h30, depois do prazo das 6h00. Então o boletim da manhã precisa mudar de horário."
-
-### Checklist antes de enviar
-
-- [ ] Usuário (plantonista) e problema claros.
-- [ ] Recorte pequeno e viável (sem WhatsApp automático e sem leitura automática das fontes).
-- [ ] RF dizem o que a solução faz; RNF têm forma de conferir.
-- [ ] Regras sem dúvida de limite (60 min, inclusivo; 20h da véspera; 10 eventos; 40% e 60%).
-- [ ] Critérios de acessibilidade definidos.
-- [ ] CAs com situação e resultado verificáveis.
-- [ ] Escopo explícito do que entra e do que fica fora.
-- [ ] Tarefas com responsável, revisão e prazo.
-- [ ] Todos com commit próprio e URL na tabela da seção 10.
-- [ ] Link do repositório preenchido e acesso do docente conferido.
-- [ ] Envio no Classroom até 16/11, 23h59.
