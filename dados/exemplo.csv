@@ -1,0 +1,4 @@
+id,tipo,fonte,oque,linhas,onde,inicio,fim,link,hora_fonte,autor,checador,hora_canal
+1,desvio,CTTU,Linhas desviadas pela Rua da Aurora por obra na via (DADO FICTÍCIO),"040, 043",Rua do Hospício,25/11/2026 08:00,28/11/2026 18:00,https://exemplo.gov.br/aviso-1,25/11/2026 05:50,Arthur,Rafael,
+2,chuva forte,APAC,Alerta de chuva forte com risco de alagamento (DADO FICTÍCIO),todas,Todo o trecho,25/11/2026 16:00,25/11/2026 22:00,https://exemplo.gov.br/aviso-2,25/11/2026 14:10,Rafael,,
+3,obra,Grande Recife,Parada desativada para troca de abrigo (DADO FICTÍCIO),"060, 2441",Shopping Boa Vista,26/11/2026 07:00,05/12/2026 18:00,https://exemplo.gov.br/aviso-3,25/11/2026 21:00,Arthur,Breno,
