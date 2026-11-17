@@ -1,0 +1,358 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Conde Avisa · avisos de ônibus antes de sair de casa</title>
+<meta name="description" content="Conde Avisa: canal único de avisos de ônibus da Av. Conde da Boa Vista, no Recife, e a ferramenta em Python do plantonista. Projeto AdmTech, Lente 7, entrega 1 da AV2.">
+<meta property="og:title" content="Conde Avisa">
+<meta property="og:description" content="Canal único de avisos de ônibus da Av. Conde da Boa Vista, no Recife. Projeto AdmTech, Lente 7.">
+<meta property="og:image" content="assets/corredor-exclusivo-de-onibus-na-avenida-conde.jpg">
+<meta name="theme-color" content="#111110">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='15' fill='%23ffc629'/%3E%3Cpath d='M16 16 L16 31 A15 15 0 0 1 8.5 29 Z' fill='%23111110'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..125,400..800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/site.css">
+<script>document.documentElement.classList.add('js')</script>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
+</head>
+<body>
+
+<header class="nav" id="nav">
+  <a class="wordmark" href="#topo" aria-label="Conde Avisa, início"><span class="dot"></span>Conde Avisa</a>
+  <ul>
+    <li class="nav-links"><a href="#problema">O problema</a></li>
+    <li class="nav-links"><a href="#como-funciona">Como funciona</a></li>
+    <li class="nav-links"><a href="#regras">Regras</a></li>
+    <li class="nav-links"><a href="#equipe">Equipe</a></li>
+    <li><a class="btn btn--small" href="https://github.com/jfrancomelo-eng/Atv.-FP">Repositório</a></li>
+  </ul>
+</header>
+
+<main id="topo">
+
+<!-- HERO: o círculo da parada é também o mostrador. A cunha preta são os 60 minutos antes do pico. -->
+<section class="hero" aria-labelledby="titulo">
+  <div class="hero-copy">
+    <h1 id="titulo" class="rv">Avisa antes de você sair.</h1>
+    <p class="lead rv">Um canal só com os avisos de obra, desvio e chuva da Av. Conde da Boa Vista, no Recife, antes do pico.</p>
+    <div class="hero-actions rv">
+      <a class="btn" href="#regra">Testar a regra dos 60 minutos</a>
+      <a class="textlink" href="#problema">Ver o problema</a>
+    </div>
+    <p class="hero-meta rv">Projeto AdmTech, Lente 7, CESAR School. Definições e planejamento da v0.1, apresentados em 17/11/2026.</p>
+  </div>
+  <div class="dial" aria-hidden="true">
+    <svg viewBox="0 0 1200 1200">
+      <circle class="face" cx="600" cy="600" r="600"/>
+      <path class="wedge" d="M600 600 L600 1160 A560 560 0 0 1 320 1084.97 Z"/>
+      <g class="ticks">
+        <circle cx="600" cy="62" r="14" fill="#111110"/><circle cx="869" cy="134" r="10" fill="#111110"/><circle cx="1066" cy="331" r="10" fill="#111110"/>
+        <circle cx="1138" cy="600" r="14" fill="#111110"/><circle cx="1066" cy="869" r="10" fill="#111110"/><circle cx="869" cy="1066" r="10" fill="#111110"/>
+        <circle cx="331" cy="1066" r="10" fill="#111110"/><circle cx="134" cy="869" r="10" fill="#111110"/><circle cx="62" cy="600" r="14" fill="#111110"/>
+        <circle cx="134" cy="331" r="10" fill="#111110"/><circle cx="331" cy="134" r="10" fill="#111110"/>
+      </g>
+      <g class="hand"><rect x="590" y="190" width="20" height="420" rx="10"/><circle cx="600" cy="600" r="34"/></g>
+      <text x="640" y="1030">7h00</text>
+      <text class="t-small" x="640" y="1070">pico</text>
+      <text x="170" y="930">6h00</text>
+      <text class="t-small" x="170" y="970">prazo</text>
+    </svg>
+  </div>
+</section>
+
+<!-- O PROBLEMA -->
+<section class="section wrap" id="problema" aria-labelledby="h-problema">
+  <div class="problem">
+    <h2 id="h-problema" class="rv">Quatro órgãos, nenhum lugar só.</h2>
+    <p class="statement rv">Na Conde da Boa Vista <span class="thumb"><img src="assets/corredor-exclusivo-de-onibus-na-avenida-conde.jpg" alt="" width="40" height="40"></span> passam 53 linhas. Obra <span class="thumb"><img src="assets/cam00256.jpg" alt="" width="40" height="40"></span>, desvio e chuva <span class="thumb"><img src="assets/30-05-2022-sobrevoo-de-areas-afetadas.jpg" alt="" width="40" height="40"></span> chegam por quatro canais diferentes.</p>
+    <figure>
+      <div class="shutter"><img src="assets/corredor-exclusivo-de-onibus-na-avenida-conde.jpg" width="1920" height="1440" alt="Corredor exclusivo de ônibus na Av. Conde da Boa Vista, com um ônibus articulado e a passarela ao fundo" loading="lazy" decoding="async"></div>
+      <figcaption>O corredor exclusivo da Av. Conde da Boa Vista, parte do eixo Leste-Oeste. Foto: A. Júnior, CC BY 2.0.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- O CORREDOR EM 3D: a câmera anda do Derby à Ponte Duarte Coelho com a rolagem -->
+<div class="wrap corridor-intro">
+  <h2 id="h-corredor" class="rv">O trecho, parada a parada.</h2>
+  <p class="route rv">Do Derby à Ponte Duarte Coelho, nos picos de <b>7h às 9h</b> e de <b>17h às 19h</b>. Role para andar pela avenida.</p>
+</div>
+<section class="corridor" id="corredor" aria-labelledby="h-corredor">
+  <div class="corridor-stage">
+    <img class="corridor-fallback" src="assets/corredor-exclusivo-de-onibus-na-avenida-conde.jpg" alt="" width="1920" height="1440">
+    <div class="corridor-cards" aria-live="polite">
+      <article class="ccard is-on" data-stop="0">
+        <p class="where"><span class="dot"></span>Derby</p>
+        <p>49 linhas de ônibus e 4 de BRT dividem o mesmo eixo. O passageiro decide no ponto qual delas serve.</p>
+        <p class="src">Prefeitura do Recife, 2018 (Artefato I, N7)</p>
+      </article>
+      <article class="ccard" data-stop="2">
+        <p class="where"><span class="dot"></span>Rua do Hospício</p>
+        <p>Em 2024, a obra foi da Emlurb, o desvio da CTTU e o aviso do Grande Recife: 184 cartazes em 21 paradas.</p>
+        <p class="src">Interdição de 22/04 a 16/07/2024 (Artefato I, N1, N6, N9)</p>
+      </article>
+      <article class="ccard" data-stop="4">
+        <p class="where"><span class="dot"></span>Shopping Boa Vista</p>
+        <p>Sem um lugar só para olhar, a mudança é descoberta no ponto, quando a pessoa já saiu de casa.</p>
+        <p class="src">Entrevistas de 14 e 18/09/2026 (Artefato I, Pilar 2)</p>
+      </article>
+      <article class="ccard" data-stop="7">
+        <p class="where"><span class="dot"></span>Ponte Duarte Coelho</p>
+        <p>A aposta: um canal que republica os avisos oficiais, com a fonte citada, antes de a pessoa sair.</p>
+        <p class="src">Tensão T4: centralização da informação × fragmentação institucional</p>
+      </article>
+    </div>
+    <div class="corridor-progress" aria-hidden="true"><span class="is-on"></span><span></span><span></span><span></span></div>
+  </div>
+</section>
+
+<!-- COMO FUNCIONA: três passos que crescem -->
+<section class="section wrap" id="como-funciona" aria-labelledby="h-como">
+  <div class="how">
+    <h2 id="h-como" class="rv">Um plantão, três passos.</h2>
+    <p class="lead rv">O usuário do programa é o plantonista da curadoria. O passageiro só recebe o boletim, sem app e sem cadastro.</p>
+    <div class="tiles">
+      <div class="tile rv">
+        <div class="box"><img src="assets/cam00256.jpg" width="1600" height="1200" alt="Placa da Prefeitura do Recife anunciando a implantação de parada do BRT na Av. Conde da Boa Vista" loading="lazy" decoding="async"></div>
+        <h3>Registrar</h3>
+        <span class="when">5h30 e 15h30</span>
+        <p>O plantonista lê Grande Recife, CTTU, CBTU e APAC e registra só o que afeta as paradas do trecho.</p>
+      </div>
+      <div class="tile rv">
+        <div class="box"><img src="assets/2022-09-10-11-40-02-proibido.jpg" width="1920" height="2560" alt="Placa de trânsito de proibido estacionar, exceto ônibus, numa rua do Recife" loading="lazy" decoding="async" style="object-position:50% 20%"></div>
+        <h3>Checar</h3>
+        <span class="when">antes de publicar</span>
+        <p>Outra pessoa confere o aviso. O autor não pode checar o próprio aviso (RN06).</p>
+      </div>
+      <div class="tile rv">
+        <div class="box" id="phone-box">
+          <canvas id="phone-canvas" aria-hidden="true"></canvas>
+          <div class="phone-fallback">
+            <b>Conde Avisa. Boletim de 25/11/2026 às 06h30.</b><br><br>
+            Aviso 1 de 1: Desvio<br>O quê: linhas desviadas pela Rua da Aurora<br>Linhas: 040, 043<br>Onde: Rua do Hospício<br>Até quando: 28/11/2026 às 18h00<br>Fonte: CTTU, trânsito do Recife.<br><br>Projeto acadêmico, não oficial.
+          </div>
+        </div>
+        <h3>Publicar</h3>
+        <span class="when">6h30 e 16h30</span>
+        <p>O programa gera o boletim em texto puro, que o plantonista cola no canal de WhatsApp. Exemplo com dados fictícios.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- A REGRA DOS 60 MINUTOS: a coisa viva -->
+<section class="section rule" id="regra" aria-labelledby="h-regra">
+  <div class="wrap rule-grid">
+    <h2 id="h-regra" class="rv">A regra dos 60 minutos.</h2>
+    <p class="lead rv">Um aviso só é útil se sai até 60 minutos antes do pico que o evento atinge. Para obra programada, o prazo é 20h da véspera.</p>
+    <p class="rule-note rv">Teste com os critérios de aceitação CA10 a CA12, ou mude os horários. A conta é a mesma do programa em Python (RN08).</p>
+    <div class="calc rv">
+      <form id="calc" onsubmit="return false">
+        <div class="field">
+          <label for="c-tipo">Tipo de aviso</label>
+          <select id="c-tipo">
+            <option value="desvio">Desvio</option>
+            <option value="interdição">Interdição</option>
+            <option value="parada desativada">Parada desativada</option>
+            <option value="mudança de linha">Mudança de linha</option>
+            <option value="chuva forte">Chuva forte</option>
+            <option value="obra">Obra programada</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="c-inicio">O evento começa às</label>
+          <input id="c-inicio" type="time" value="08:00" required>
+        </div>
+        <div class="field">
+          <label for="c-fonte">A fonte publicou</label>
+          <div class="field-row">
+            <select id="c-dia" aria-label="Dia da publicação na fonte">
+              <option value="0">no dia</option>
+              <option value="-1">na véspera</option>
+            </select>
+            <input id="c-fonte" type="time" value="05:50" required>
+          </div>
+        </div>
+        <div class="presets" role="group" aria-label="Exemplos dos critérios de aceitação">
+          <button type="button" class="chip" data-p="desvio|08:00|0|05:50">CA10: 05h50</button>
+          <button type="button" class="chip" data-p="desvio|08:00|0|06:01">CA10: 06h01</button>
+          <button type="button" class="chip" data-p="obra|07:00|-1|20:00">CA11: obra</button>
+          <button type="button" class="chip" data-p="chuva forte|16:00|0|14:10">Chuva às 16h</button>
+        </div>
+      </form>
+      <div class="calc-out">
+        <div class="verdicts">
+          <div class="verdict" id="v-fonte"><p class="v">—</p><p class="d"></p></div>
+          <div class="verdict" id="v-canal"><p class="v">—</p><p class="d"></p></div>
+        </div>
+        <div class="timeline" id="tl" aria-hidden="true">
+          <div class="track"></div>
+          <div class="peak" id="tl-peak"></div>
+          <div class="mark m-src" id="tl-src"><span>fonte</span></div>
+          <div class="mark m-bol" id="tl-bol"><span>boletim</span></div>
+          <div class="ticks"><span id="tl-a"></span><span id="tl-b"></span></div>
+        </div>
+        <p class="calc-explain" id="c-explain"></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- NÚMEROS -->
+<section class="section wrap" aria-labelledby="h-numeros">
+  <div class="stats">
+    <div class="stat stat-a rv"><p class="fig">60 min</p><p>de antecedência antes do pico: o prazo para um aviso mudar a decisão de quem ainda está em casa.</p></div>
+    <h2 id="h-numeros" class="rv">O corredor em três números.</h2>
+    <div class="stat stat-b rv"><p class="fig">184</p><p>cartazes em 21 paradas na interdição da Rua do Hospício, em 2024.</p></div>
+    <div class="stat stat-c rv"><p class="fig">4</p><p>órgãos com canais separados: Grande Recife, CTTU, CBTU e APAC.</p></div>
+  </div>
+</section>
+
+<!-- O QUE A V0.1 FAZ -->
+<section class="section wrap" aria-labelledby="h-faz">
+  <div class="features">
+    <figure class="rv">
+      <div class="round"><img src="assets/parada-de-onibus.jpg" width="1023" height="681" alt="Pessoas esperando numa parada de ônibus com abrigo, em preto e branco" loading="lazy" decoding="async"></div>
+    </figure>
+    <div class="features-body">
+      <h2 id="h-faz" class="rv">O que a v0.1 faz.</h2>
+      <ul class="points">
+        <li class="rv"><h3><span class="dot"></span>Registra o aviso</h3><p>Tipo, fonte, o quê, linhas, onde, início, fim, link e horário na fonte (RF01).</p></li>
+        <li class="rv"><h3><span class="dot"></span>Recusa o que não serve</h3><p>Fonte, tipo ou parada fora da lista voltam com as opções aceitas (RF02).</p></li>
+        <li class="rv"><h3><span class="dot"></span>Exige dupla checagem</h3><p>Um segundo integrante confere antes de qualquer publicação (RF03).</p></li>
+        <li class="rv"><h3><span class="dot"></span>Lista a situação</h3><p>Checado ou não, horário na fonte, no canal e antecedência (RF04).</p></li>
+        <li class="rv"><h3><span class="dot"></span>Gera o boletim</h3><p>6h30 ou 16h30, ou "Sem mudanças hoje" quando não há aviso (RF05).</p></li>
+        <li class="rv"><h3><span class="dot"></span>Marca a publicação</h3><p>Grava o horário no canal uma vez, no primeiro boletim (RF06).</p></li>
+        <li class="rv"><h3><span class="dot"></span>Mede a antecedência</h3><p>Útil na fonte, útil no canal e o atraso em minutos (RF07).</p></li>
+        <li class="rv"><h3><span class="dot"></span>Faz o relatório</h3><p>Percentual útil, atraso médio e contagem por tipo de aviso (RF08).</p></li>
+        <li class="rv"><h3><span class="dot"></span>Guarda em planilha</h3><p>Tudo em avisos.csv, que abre no Excel ou no Google Planilhas (RF09).</p></li>
+      </ul>
+      <p class="tech rv"><span><b>Python 3</b> puro, sem bibliotecas externas</span><span><b>Sem internet</b> e sem serviço pago</span><span><b>16 testes</b> para os critérios CA01 a CA14</span></p>
+    </div>
+  </div>
+</section>
+
+<!-- REGRAS, ACESSIBILIDADE E ESCOPO -->
+<section class="section wrap rules" id="regras" aria-labelledby="h-regras">
+  <h2 id="h-regras" class="rv">Regras, acessibilidade e limites.</h2>
+
+  <div class="cat rv"><h3>Regras de negócio</h3><span>11 regras</span></div>
+  <ul class="items">
+    <li class="item rv"><span class="pic sym">RN01</span><div><p class="top"><b>Só fontes oficiais</b><em>Artefato II</em></p><p>Grande Recife, CTTU, CBTU ou APAC. Qualquer outra é recusada.</p></div></li>
+    <li class="item rv"><span class="pic sym">RN02</span><div><p class="top"><b>Seis tipos de aviso</b><em>Devolutiva</em></p><p>Obra, desvio, interdição, parada desativada, mudança de linha e chuva forte.</p></div></li>
+    <li class="item rv"><span class="pic sym">RN03</span><div><p class="top"><b>Só o trecho</b><em>Recorte</em></p><p>Sete paradas do Derby à Ponte Duarte Coelho, ou "Todo o trecho". <strong>Lista a confirmar em campo.</strong></p></div></li>
+    <li class="item rv"><span class="pic sym">RN04</span><div><p class="top"><b>Texto curto e completo</b><em>Leitura em 20 s</em></p><p>"O quê" com até 100 caracteres. Linhas obrigatórias, exceto em chuva forte.</p></div></li>
+    <li class="item rv"><span class="pic sym">RN05</span><div><p class="top"><b>Datas sem ambiguidade</b><em>Equipe</em></p><p>DD/MM/AAAA HH:MM. O fim é igual ou depois do início.</p></div></li>
+    <li class="item rv"><span class="pic sym">RN06</span><div><p class="top"><b>Dupla checagem</b><em>Risco R2</em></p><p>Quem confere é sempre outra pessoa, nunca o autor.</p></div></li>
+    <li class="item rv"><span class="pic sym">RN07</span><div><p class="top"><b>O que entra no boletim</b><em>Risco R6</em></p><p>Só avisos checados, vigentes e já publicados pela fonte. Rodapé "não oficial" sempre.</p></div></li>
+    <li class="item rv"><span class="pic sym">RN08</span><div><p class="top"><b>Antecedência útil</b><em>Artefato III</em></p><p>60 min antes do pico atingido, com o limite incluído. Obra: até 20h da véspera.</p></div></li>
+    <li class="item rv"><span class="pic sym">RN09</span><div><p class="top"><b>Atraso fonte → canal</b><em>Artefato II</em></p><p>Horário no canal menos horário na fonte, em minutos.</p></div></li>
+    <li class="item rv"><span class="pic sym">RN10</span><div><p class="top"><b>Leitura do relatório</b><em>Artefato III</em></p><p>Menos de 10 eventos: inconclusivo. 60% ou mais: fonte a tempo. Menos de 40%: o dado nasce tarde.</p></div></li>
+    <li class="item rv"><span class="pic sym">RN11</span><div><p class="top"><b>Nenhum dado de passageiro</b><em>LGPD</em></p><p>Só o nome de quem escreveu e de quem conferiu o aviso.</p></div></li>
+  </ul>
+
+  <div class="cat rv"><h3>Acessibilidade</h3><span>6 critérios</span></div>
+  <ul class="items">
+    <li class="item rv"><span class="pic sym paper">AC01</span><div><p class="top"><b>Só texto</b><em>Leitor de tela</em></p><p>Nada depende de imagem, cor, emoji ou negrito. Conferido com TalkBack e VoiceOver.</p></div></li>
+    <li class="item rv"><span class="pic sym paper">AC02</span><div><p class="top"><b>Um rótulo por linha</b><em>Boletim</em></p><p>O quê, Linhas, Onde, Até quando, Fonte. Cada aviso começa com "Aviso 1 de 2".</p></div></li>
+    <li class="item rv"><span class="pic sym paper">AC03</span><div><p class="top"><b>Sem sigla solta</b><em>Boletim</em></p><p>"16h30", datas DD/MM/AAAA e "CTTU, trânsito do Recife".</p></div></li>
+    <li class="item rv"><span class="pic sym paper">AC04</span><div><p class="top"><b>Leitura curta</b><em>RN04</em></p><p>Até 100 caracteres no "o quê", em linguagem simples.</p></div></li>
+    <li class="item rv"><span class="pic sym paper">AC05</span><div><p class="top"><b>Só teclado</b><em>Programa</em></p><p>Opções numeradas. Errou a opção? A pergunta repete sem apagar o resto.</p></div></li>
+    <li class="item rv"><span class="pic sym paper">AC06</span><div><p class="top"><b>Cartaz legível</b><em>Em campo</em></p><p>Letra grande, alto contraste e o link escrito ao lado do QR code.</p></div></li>
+  </ul>
+
+  <div class="cat rv"><h3>Fora da v0.1</h3><span>e por quê</span></div>
+  <ul class="items">
+    <li class="item rv"><span class="pic sym grey">WA</span><div><p class="top"><b>Envio automático ao WhatsApp</b></p><p>A API é paga e exige aprovação. O plantonista copia e cola.</p></div></li>
+    <li class="item rv"><span class="pic sym grey">WEB</span><div><p class="top"><b>Leitura automática das fontes</b></p><p>Só quando o órgão publicar dado estruturado.</p></div></li>
+    <li class="item rv"><span class="pic sym grey">GPS</span><div><p class="top"><b>Lotação em tempo real</b></p><p>O squad não promete o que não tem (Cenário 1).</p></div></li>
+    <li class="item rv"><span class="pic sym grey">20h</span><div><p class="top"><b>Boletim da véspera</b></p><p>Fica para a fase 2. A calculadora acima mostra por que ele importa.</p></div></li>
+  </ul>
+</section>
+
+<!-- CRITÉRIOS DE ACEITAÇÃO -->
+<section class="section tests" aria-labelledby="h-testes">
+  <div class="wrap tests-grid">
+    <h2 id="h-testes" class="rv">Como conferir.</h2>
+    <p class="lead rv">Catorze critérios, cada um com um teste automático no repositório. Os dados dos exemplos são fictícios.</p>
+    <div class="table-wrap rv">
+      <table>
+        <thead><tr><th scope="col">Critério</th><th scope="col">Dado</th><th scope="col">Quando</th><th scope="col">Então</th></tr></thead>
+        <tbody>
+          <tr><td>CA01</td><td>Planilha vazia</td><td>Registra o desvio com a fonte "cttu"</td><td>Salvo como "CTTU", aguardando checagem<span class="refs">RF01 · RN01</span></td></tr>
+          <tr><td>CA02</td><td>Aviso em registro</td><td>Fonte "Grupo de bairro"</td><td>Mostra as quatro fontes aceitas; nada é salvo<span class="refs">RF02 · RN01</span></td></tr>
+          <tr><td>CA03</td><td>Aviso em registro</td><td>Local "Boa Viagem"</td><td>Parada fora do trecho; nada é salvo<span class="refs">RF02 · RN03</span></td></tr>
+          <tr><td>CA04</td><td>Aviso em registro</td><td>Fim antes do início, ou data "2026-11-25"</td><td>Informa o campo e o formato; nada é salvo<span class="refs">RF01 · RN05</span></td></tr>
+          <tr><td>CA05</td><td>Aviso em registro</td><td>"O quê" com 101 caracteres</td><td>"use no máximo 100 caracteres"<span class="refs">RF01 · RN04</span></td></tr>
+          <tr><td>CA06</td><td>Chuva forte da APAC, todo o trecho</td><td>Linhas em branco</td><td>Aceito com linhas = "todas"; desvio sem linhas é recusado<span class="refs">RF01 · RN04</span></td></tr>
+          <tr><td>CA07</td><td>Aviso escrito por Arthur</td><td>"arthur" tenta checar; depois Rafael checa</td><td>Primeira recusada; segunda aceita<span class="refs">RF03 · RN06</span></td></tr>
+          <tr><td>CA08</td><td>Só um aviso não checado</td><td>Boletim de 25/11 às 6h30</td><td>"Sem mudanças hoje" e rodapé "não oficial"<span class="refs">RF05 · RN07</span></td></tr>
+          <tr><td>CA09</td><td>Checado, não checado, vencido e futuro</td><td>Boletim de 25/11 às 6h30</td><td>Só o checado aparece, com todos os rótulos<span class="refs">RF05 · RN07 · AC02</span></td></tr>
+          <tr><td>CA10</td><td>Evento às 08:00, prazo 06:00</td><td>Fonte às 05:50, 06:00 e 06:01</td><td>Útil: sim, sim (limite) e não<span class="refs">RF07 · RN08</span></td></tr>
+          <tr><td>CA11</td><td>Obra às 07:00 de 26/11</td><td>Fonte em 25/11 às 20:00 ou 21:00</td><td>Útil: sim e não<span class="refs">RF07 · RN08</span></td></tr>
+          <tr><td>CA12</td><td>Aviso da fonte às 05:50</td><td>Boletim das 6h30 publicado</td><td>Atraso 40 min; útil na fonte, tarde no canal<span class="refs">RF06 · RF07 · RN09</span></td></tr>
+          <tr><td>CA13</td><td>4 avisos registrados</td><td>Abre o relatório</td><td>"Inconclusivo: menos de 10 eventos"<span class="refs">RF08 · RN10</span></td></tr>
+          <tr><td>CA14</td><td>10 avisos, 7 a tempo</td><td>Abre o relatório</td><td>"7 (70%)" e "Fonte publica a tempo"; com 3, "Cenário 2"<span class="refs">RF08 · RN10</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- EQUIPE E TAREFAS -->
+<section class="section team" id="equipe" aria-labelledby="h-equipe">
+  <div class="panel">
+    <h2 id="h-equipe" class="rv">Quem faz o quê.</h2>
+    <figure class="rv">
+      <div class="round"><img src="assets/ponte-duarte-coelho-boa-vista-recife-capibaribe.jpg" width="1490" height="1089" alt="Ponte Duarte Coelho sobre o Rio Capibaribe, com ônibus passando e prédios da Boa Vista ao fundo" loading="lazy" decoding="async"></div>
+    </figure>
+    <div class="panel-text">
+      <div class="rv">
+        <h3>Sete pessoas, doze tarefas</h3>
+        <ul class="members">
+          <li><span class="dot"></span><p><b>Juan</b> <span>coordenação e riscos · T06, T11: repositório, menu e planilha</span></p></li>
+          <li><span class="dot"></span><p><b>Luiz Barreto</b> <span>redação e defesa · T01: visão geral e recorte</span></p></li>
+          <li><span class="dot"></span><p><b>Arthur</b> <span>curadoria · T02, T08: registro e checagem</span></p></li>
+          <li><span class="dot"></span><p><b>Rafael</b> <span>curadoria · T03, T09: boletim e acessibilidade</span></p></li>
+          <li><span class="dot"></span><p><b>Berto</b> <span>campo · T07: paradas e fontes em campo</span></p></li>
+          <li><span class="dot"></span><p><b>Heitor</b> <span>campo · T05, T12: critérios e testes</span></p></li>
+          <li><span class="dot"></span><p><b>Breno</b> <span>dados · T04, T10: antecedência e relatório</span></p></li>
+        </ul>
+      </div>
+      <div class="rv">
+        <h3>Quando</h3>
+        <p class="plan"><b>Até 16/11:</b> definições, requisitos, regras e critérios (T01 a T06). <b>Até 20/11:</b> lista de paradas em campo (T07). <b>Até 23/11:</b> cada integrante revisa e assume a sua parte do código (T08 a T12).</p>
+      </div>
+      <div class="rv"><a class="btn" href="https://github.com/jfrancomelo-eng/Atv.-FP">Abrir o repositório</a></div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="footer" aria-labelledby="h-rodape">
+  <h2 id="h-rodape" class="sr">Conde Avisa</h2>
+  <div class="blocks" aria-hidden="true">
+    <span style="height:100%">C</span><span class="o" style="height:78%">O</span><span style="height:92%">N</span><span style="height:66%">D</span><span style="height:84%">E</span>
+    <span class="gap"></span>
+    <span style="height:70%">A</span><span style="height:96%">V</span><span style="height:60%">I</span><span style="height:88%">S</span><span style="height:74%">A</span>
+  </div>
+  <div class="foot-links">
+    <div><b>Documentação</b><a href="AV2_Entrega_1_Conde_Avisa.docx">Documento da entrega (.docx)</a><a href="https://github.com/jfrancomelo-eng/Atv.-FP#readme">README no GitHub</a></div>
+    <div><b>Código</b><a href="https://github.com/jfrancomelo-eng/Atv.-FP/blob/main/main.py">main.py</a><a href="https://github.com/jfrancomelo-eng/Atv.-FP/tree/main/conde_avisa">conde_avisa/</a><a href="https://github.com/jfrancomelo-eng/Atv.-FP/blob/main/tests/test_conde_avisa.py">Testes CA01 a CA14</a></div>
+    <div><b>Projeto</b><span>AdmTech · Lente 7</span><span>Última Milha do Trabalho e do Estudo</span><span>CESAR School, Recife</span></div>
+    <div><b>Aviso</b><span>Projeto acadêmico, não oficial. Confira sempre a fonte de cada aviso.</span></div>
+  </div>
+  <p class="credits">Fotos: <a href="https://commons.wikimedia.org/w/index.php?curid=25952717">Corredor exclusivo de ônibus na Av. Conde da Boa Vista</a>, A. Júnior, <a href="https://creativecommons.org/licenses/by/2.0/">CC BY 2.0</a>; <a href="https://commons.wikimedia.org/wiki/File:CAM00256.jpg">Placa da parada do BRT na Conde da Boa Vista</a>, Philippe Bresil, <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>; <a href="https://commons.wikimedia.org/w/index.php?curid=122864434">Proibido estacionamento de ônibus</a>, Leonaardog, CC0; <a href="https://www.flickr.com/photos/134077223@N03/30217631795">Parada de ônibus</a>, flavia souza fotoarte, <a href="https://creativecommons.org/licenses/by/2.0/">CC BY 2.0</a>; <a href="https://commons.wikimedia.org/w/index.php?curid=119251012">Ponte Duarte Coelho</a>, marcusrg, <a href="https://creativecommons.org/licenses/by/2.0/">CC BY 2.0</a>; <a href="https://commons.wikimedia.org/w/index.php?curid=118470708">Sobrevoo de áreas afetadas pela chuva, 30/05/2022</a>, Palácio do Planalto, <a href="https://creativecommons.org/licenses/by/2.0/">CC BY 2.0</a>. Cena 3D do corredor e do celular desenhadas em código.</p>
+  <div class="foot-last"><span>Conde Avisa · 2026</span><a class="btn btn--ink btn--small" href="#topo">Voltar ao topo</a></div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>
+<script src="js/site.js"></script>
+<script type="module" src="js/scenes.js"></script>
+</body>
+</html>
