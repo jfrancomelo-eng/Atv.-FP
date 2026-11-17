@@ -4,7 +4,7 @@
 
 **Disciplina:** AdmTech · **Docente:** José Adeilmo Nunes Barbosa Junior
 **Etapa:** 17/11/2026 — definições e planejamento
-**Lente:** 7 · Última Milha do Trabalho e do Estudo (Projeto Integrador — Mobilidade Urbana no Recife)
+**Lente:** 7 · Última Milha do Trabalho e do Estudo (Projeto Integrador — Mobilidade Urbana no Recife).
 
 Base: Artefatos I, II e III e devolutiva do Artefato II. Os avisos usados nos exemplos são **fictícios**.
 
