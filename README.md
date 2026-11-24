@@ -1,5 +1,8 @@
 # Conde Avisa — Documentação da entrega 1 da AV2
 
+> 🌐 **Site do projeto:** **[jfrancomelo-eng.github.io/Atv.-FP](https://jfrancomelo-eng.github.io/Atv.-FP/)**  
+> 📄 **Documento da entrega:** [docs/AV2_Entrega_1_Conde_Avisa.docx](docs/AV2_Entrega_1_Conde_Avisa.docx)
+
 ## Definições e planejamento da v0.1
 
 **Disciplina:** AdmTech · **Docente:** José Adeilmo Nunes Barbosa Junior
@@ -18,6 +21,7 @@ Base: Artefatos I, II e III e devolutiva do Artefato II. Os avisos usados nos ex
 | Turma e docente | AdmTech, José Adeilmo Nunes Barbosa Junior |
 | Versão e data | Planejamento da v0.1, 16/11/2026 |
 | Repositório | https://github.com/jfrancomelo-eng/Atv.-FP (acesso de leitura liberado ao docente) |
+| Site | https://jfrancomelo-eng.github.io/Atv.-FP/ |
 
 ---
 
