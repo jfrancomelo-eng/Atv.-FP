@@ -1,0 +1,1465 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Safepark · Inteligência de vagas na Zona Azul</title>
+  <meta name="description" content="Safepark mostra, antes de você sair de casa, a ocupação da Zona Azul do Centro do Recife por micro-região. Projeto AV2 de ADM Tech na CESAR School.">
+  <meta property="og:title" content="Safepark · Saiba se tem vaga antes de sair de casa">
+  <meta property="og:description" content="Ocupação da Zona Azul do Centro do Recife por micro-região, mantida pelos próprios motoristas.">
+  <meta property="og:type" content="website">
+  <meta name="theme-color" content="#070b16">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%234c8dff'/%3E%3Cpath d='M22 50V14h13a11 11 0 0 1 0 22h-6v14z M29 21v8h6a4 4 0 0 0 0-8z' fill='%23070b16'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Hanken+Grotesk:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+  <style>
+:root {
+  --bg: #070b16;
+  --bg-2: #0c1222;
+  --surface: #111a2e;
+  --surface-2: #17213a;
+  --line: rgba(200, 215, 255, 0.09);
+  --line-2: rgba(200, 215, 255, 0.16);
+  --text: #eaeef7;
+  --muted: #a7b1c6;
+  --azul: #4c8dff;
+  --azul-2: #8bb4ff;
+  --livre: #34d399;
+  --moderada: #f5b83d;
+  --cheia: #f2545b;
+  --raio: 18px;
+  --display: 'Bricolage Grotesque', system-ui, sans-serif;
+  --body: 'Hanken Grotesk', system-ui, sans-serif;
+  --mono: 'JetBrains Mono', ui-monospace, monospace;
+  --gutter: clamp(16px, 4vw, 56px);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: var(--bg); color: var(--text);
+  font: 400 16px/1.6 var(--body); overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+img { max-width: 100%; display: block; }
+a { color: inherit; }
+h1, h2, h3 { font-family: var(--display); font-weight: 700; letter-spacing: -0.02em; margin: 0; line-height: 1.04; }
+p { margin: 0; }
+:focus-visible { outline: 2px solid var(--azul-2); outline-offset: 3px; border-radius: 6px; }
+.pular { position: absolute; left: -999px; top: 8px; background: var(--azul); color: #000; padding: 8px 14px; border-radius: 8px; z-index: 100; }
+.pular:focus { left: 8px; }
+
+/* Botões */
+.btn {
+  --b: var(--azul);
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 14px 22px; border-radius: 999px; border: 0; cursor: pointer;
+  background: var(--b); color: #050914; font: 600 15px/1 var(--body); text-decoration: none;
+  transition: transform .18s cubic-bezier(.2,.8,.2,1), background .2s, box-shadow .2s;
+  box-shadow: 0 0 0 0 rgba(76,141,255,0);
+}
+.btn:hover { transform: translateY(-1px); background: var(--azul-2); }
+.btn:active { transform: translateY(0) scale(.98); }
+.btn:disabled { opacity: .45; cursor: not-allowed; transform: none; box-shadow: none; }
+.btn-ghost { background: transparent; color: var(--text); box-shadow: inset 0 0 0 1px var(--line-2); }
+.btn-ghost:hover { box-shadow: inset 0 0 0 1px var(--azul-2); }
+.btn-sm { padding: 10px 16px; font-size: 14px; }
+.btn-grande { width: 100%; padding: 20px; font-size: 17px; border-radius: 16px; }
+.link { background: none; border: 0; color: var(--azul-2); font: inherit; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; padding: 0; }
+
+/* Nav */
+.nav {
+  position: fixed; inset: 12px var(--gutter) auto; z-index: 50;
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  padding: 10px 10px 10px 18px; border-radius: 999px;
+  background: rgba(10, 15, 30, 0.62); backdrop-filter: blur(16px) saturate(1.4);
+  border: 1px solid var(--line);
+}
+.marca { display: flex; align-items: center; gap: 10px; font: 700 18px var(--display); text-decoration: none; letter-spacing: -0.01em; }
+.marca-p { width: 28px; height: 28px; border-radius: 8px; background: var(--azul); color: var(--bg); display: grid; place-items: center; font-weight: 800; }
+.nav nav { display: flex; gap: 26px; font-size: 14px; color: var(--muted); }
+.nav nav a { text-decoration: none; transition: color .2s; }
+.nav nav a:hover { color: var(--text); }
+
+/* Hero */
+.hero { position: relative; min-height: 100svh; display: grid; align-items: center; padding: 120px var(--gutter) 80px; overflow: hidden; isolation: isolate; }
+.hero::before {
+  content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background: linear-gradient(90deg, var(--bg) 0%, rgba(7,11,22,.85) 32%, rgba(7,11,22,0) 62%), linear-gradient(0deg, var(--bg) 0%, rgba(7,11,22,0) 25%);
+}
+.hero-3d { position: absolute; inset: 0; z-index: -2; }
+.hero-3d canvas { width: 100%; height: 100%; display: block; }
+.hero-3d .labels { position: absolute; inset: 0; pointer-events: none; }
+.hero-txt { max-width: 640px; }
+.eyebrow { font: 500 12px/1.4 var(--mono); text-transform: uppercase; letter-spacing: .12em; color: var(--azul-2); margin-bottom: 20px; }
+.hero h1 { font-size: clamp(44px, 7.4vw, 104px); font-weight: 800; letter-spacing: -0.035em; }
+.hero h1 em { font-style: normal; color: var(--azul); }
+.lead { margin-top: 26px; font-size: clamp(17px, 1.5vw, 20px); color: #c4cce0; max-width: 54ch; }
+.cta { display: flex; gap: 12px; margin-top: 34px; flex-wrap: wrap; }
+.hero-stats { display: flex; gap: clamp(20px, 4vw, 48px); margin: 56px 0 0; padding-top: 24px; border-top: 1px solid var(--line); flex-wrap: wrap; }
+.hero-stats dt { font: 500 12px var(--mono); color: var(--muted); text-transform: uppercase; letter-spacing: .08em; }
+.hero-stats dd { margin: 6px 0 0; font: 700 34px/1 var(--display); display: flex; align-items: baseline; gap: 8px; }
+.hero-stats small { font: 600 13px var(--body); color: var(--livre); }
+.selo-simulado { font: 500 12px var(--mono); color: var(--muted); }
+.selo-simulado span { color: var(--moderada); }
+.hero-selo { position: absolute; right: var(--gutter); bottom: 28px; }
+
+/* Labels 3D */
+.labels { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+.pin {
+  position: absolute; left: 0; top: 0; pointer-events: auto; cursor: pointer;
+  display: grid; gap: 1px; padding: 7px 11px 8px; border-radius: 12px; white-space: nowrap;
+  background: rgba(10, 16, 32, 0.82); backdrop-filter: blur(8px); border: 1px solid var(--line-2);
+  color: var(--text); font: 600 13px/1.2 var(--body); text-align: left;
+  transition: border-color .2s, background .2s, opacity .3s;
+}
+.pin b { font: 600 15px var(--mono); }
+.pin small { font: 500 11px var(--body); color: var(--muted); }
+.pin[data-c="Livre"] b { color: var(--livre); }
+.pin[data-c="Moderada"] b { color: var(--moderada); }
+.pin[data-c="Cheia"] b { color: var(--cheia); }
+.pin[aria-pressed="true"] { border-color: var(--azul); background: rgba(22, 40, 80, .9); }
+.hero .pin { pointer-events: none; }
+
+/* Seções */
+.secao { padding: clamp(80px, 12vw, 160px) var(--gutter); max-width: 1320px; margin: 0 auto; }
+.secao-cab { max-width: 760px; margin-bottom: clamp(36px, 5vw, 64px); }
+.secao h2 { font-size: clamp(34px, 5vw, 64px); }
+.sub { margin-top: 18px; color: var(--muted); font-size: 18px; max-width: 60ch; }
+
+.problema-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.cartao { background: var(--surface); border: 1px solid var(--line); border-radius: var(--raio); padding: 32px 28px; }
+.cartao .num { font: 800 clamp(48px, 6vw, 76px)/1 var(--display); letter-spacing: -0.04em; margin-bottom: 18px; color: var(--text); }
+.cartao:first-child .num { color: var(--cheia); }
+.cartao p:last-child { color: #c4cce0; }
+.historia { margin: 56px 0 0; padding: 0 0 0 28px; border-left: 3px solid var(--azul); max-width: 900px; }
+.historia p { font: 500 clamp(20px, 2.3vw, 28px)/1.4 var(--display); letter-spacing: -0.01em; }
+.historia cite { display: block; margin-top: 14px; font: 500 12px var(--mono); color: var(--muted); font-style: normal; text-transform: uppercase; letter-spacing: .1em; }
+
+.passos { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; counter-reset: p; }
+.passos li { position: relative; padding: 26px 22px 28px; border-radius: var(--raio); background: var(--surface); border: 1px solid var(--line); }
+.passos span { font: 600 13px var(--mono); color: var(--azul-2); display: inline-grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--line-2); margin-bottom: 40px; }
+.passos h3 { font-size: 21px; margin-bottom: 10px; }
+.passos p { color: var(--muted); font-size: 15px; }
+
+/* App */
+.app { max-width: 1440px; }
+.aviso-simulado {
+  display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center;
+  padding: 14px 18px; border-radius: 14px; margin-bottom: 18px; font-size: 14px; color: #f6dfae;
+  background: rgba(245, 184, 61, 0.08); border: 1px solid rgba(245, 184, 61, 0.28);
+}
+.aviso-simulado .link { margin-left: auto; color: #f6dfae; }
+.app-grid { display: grid; grid-template-columns: 1.55fr 1fr; gap: 18px; }
+.mapa { position: relative; border-radius: 24px; overflow: hidden; background: radial-gradient(120% 90% at 50% 20%, #0f1c38 0%, var(--bg-2) 60%); border: 1px solid var(--line); min-height: 560px; }
+.mapa canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; cursor: grab; touch-action: pan-y; }
+.mapa canvas:active { cursor: grabbing; }
+.mapa-legenda { position: absolute; left: 16px; right: 16px; bottom: 14px; font: 500 12px var(--mono); color: var(--muted); display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: center; pointer-events: none; }
+.dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: -6px; }
+.dot.livre { background: var(--livre); } .dot.moderada { background: var(--moderada); } .dot.cheia { background: var(--cheia); }
+
+.painel { display: grid; gap: 14px; align-content: start; }
+.painel > * { background: var(--surface); border: 1px solid var(--line); border-radius: var(--raio); padding: 20px; }
+.rotulo { font: 500 12px var(--mono); color: var(--muted); text-transform: uppercase; letter-spacing: .1em; margin-bottom: 10px; }
+.destinos { margin: 0; min-width: 0; }
+.destinos legend { float: left; width: 100%; padding: 0; font: 500 12px var(--mono); color: var(--muted); text-transform: uppercase; letter-spacing: .1em; margin-bottom: 12px; }
+.destino-lista { clear: both; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.destino-btn {
+  display: grid; gap: 2px; text-align: left; padding: 12px 14px; border-radius: 12px; cursor: pointer;
+  background: var(--surface-2); border: 1px solid var(--line); color: var(--text); font: 600 14px var(--body);
+  transition: border-color .2s, background .2s, transform .15s;
+}
+.destino-btn:hover { border-color: var(--line-2); }
+.destino-btn:active { transform: scale(.98); }
+.destino-btn small { font: 500 12px var(--mono); color: var(--muted); }
+.destino-btn[aria-pressed="true"] { border-color: var(--azul); background: rgba(76, 141, 255, .12); }
+
+.leitura { display: grid; grid-template-columns: 1.3fr 1fr; gap: 18px; }
+.leitura-zona { border-left: 1px solid var(--line); padding-left: 18px; }
+.destino-nome { font: 700 20px/1.2 var(--display); min-height: 24px; }
+.destino-num { display: flex; align-items: center; gap: 10px; margin-top: 6px; }
+#d-pct { font: 800 64px/1 var(--display); letter-spacing: -0.04em; font-variant-numeric: tabular-nums; }
+.zona-num { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+#z-pct { font: 800 40px/1 var(--display); letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
+.destino-vagas { font: 500 14px var(--mono); color: var(--muted); margin-top: 6px; }
+.badge { display: inline-block; padding: 6px 12px; border-radius: 999px; font: 600 13px var(--body); background: var(--surface-2); color: var(--muted); }
+.badge[data-c="Livre"] { background: rgba(52, 211, 153, .14); color: var(--livre); }
+.badge[data-c="Moderada"] { background: rgba(245, 184, 61, .14); color: var(--moderada); }
+.badge[data-c="Cheia"] { background: rgba(242, 84, 91, .14); color: var(--cheia); }
+.barra { position: relative; height: 8px; border-radius: 99px; background: var(--surface-2); margin-top: 14px; overflow: hidden; }
+.barra i { position: absolute; inset: 0 auto 0 0; width: 0; border-radius: inherit; background: var(--azul); transition: width .6s cubic-bezier(.2,.8,.2,1), background .3s; }
+.barra b { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--bg); }
+
+.livres ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.livres li { display: grid; grid-template-columns: 22px 1fr auto auto; gap: 10px; align-items: center; padding: 8px 4px; border-bottom: 1px solid var(--line); font-size: 15px; }
+.livres li:last-child { border-bottom: 0; }
+.livres .pos { font: 600 12px var(--mono); color: var(--muted); }
+.livres .v { font: 500 12px var(--mono); color: var(--muted); }
+.livres .p { font: 600 14px var(--mono); min-width: 96px; text-align: right; }
+.livres li[data-c="Livre"] .p { color: var(--livre); }
+.livres li[data-c="Moderada"] .p { color: var(--moderada); }
+.livres li[data-c="Cheia"] .p { color: var(--cheia); }
+.livres li.sel { background: rgba(76,141,255,.08); border-radius: 8px; }
+
+.colab { display: grid; grid-template-columns: 1.1fr 1fr 1.2fr; gap: 18px; margin-top: 18px; }
+.colab > * { background: var(--surface); border: 1px solid var(--line); border-radius: var(--raio); padding: 22px; }
+.carteira { display: grid; grid-template-columns: 120px 1fr; gap: 16px; align-items: center; }
+.carteira canvas { width: 120px; height: 120px; display: block; }
+.motorista-toggle { display: inline-flex; padding: 3px; border-radius: 999px; background: var(--surface-2); margin-bottom: 14px; }
+.motorista-toggle button { border: 0; background: transparent; color: var(--muted); font: 600 13px var(--body); padding: 7px 12px; border-radius: 999px; cursor: pointer; }
+.motorista-toggle button[aria-checked="true"] { background: var(--azul); color: var(--bg); }
+.pontos { font: 800 38px/1 var(--display); letter-spacing: -0.03em; }
+.pontos span { font-variant-numeric: tabular-nums; }
+.dias { margin-top: 6px; color: #c4cce0; }
+.dias span:first-child { font-weight: 700; color: var(--text); }
+.progresso { height: 6px; border-radius: 99px; background: var(--surface-2); margin: 12px 0 10px; overflow: hidden; }
+.progresso i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--azul), var(--azul-2)); border-radius: inherit; transition: width .5s cubic-bezier(.2,.8,.2,1); }
+.dica { font-size: 13px; color: var(--muted); }
+.acoes { display: grid; gap: 12px; align-content: center; }
+.toast { min-height: 44px; font-size: 14px; padding: 10px 12px; border-radius: 10px; opacity: 0; transition: opacity .25s; }
+.toast.on { opacity: 1; }
+.toast.ok { background: rgba(52, 211, 153, .1); color: #a9f0d3; }
+.toast.erro { background: rgba(242, 84, 91, .12); color: #ffb9bc; }
+.feed ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; max-height: 220px; overflow: auto; }
+.feed li { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 12px; background: var(--surface-2); font-size: 14px; }
+.feed li small { display: block; color: var(--muted); font: 500 12px var(--mono); }
+.feed li.vazio { background: none; color: var(--muted); padding: 4px 0; }
+.feed .estado { font: 600 12px var(--body); padding: 6px 10px; border-radius: 99px; background: rgba(52,211,153,.12); color: var(--livre); }
+.feed .estado.contestado { background: rgba(242,84,91,.14); color: var(--cheia); }
+.denunciar { background: none; border: 1px solid var(--line-2); color: var(--text); font: 600 12px var(--body); padding: 8px 12px; border-radius: 99px; cursor: pointer; white-space: nowrap; }
+.denunciar:hover { border-color: var(--cheia); color: #ffb9bc; }
+
+/* Regras */
+.escala { display: flex; gap: 4px; margin-bottom: 28px; height: 74px; }
+.faixa { border-radius: 14px; padding: 14px 16px; display: flex; flex-direction: column; justify-content: space-between; min-width: 0; }
+.faixa span { font: 700 18px var(--display); }
+.faixa small { font: 500 12px var(--mono); opacity: .8; }
+.faixa.livre { background: rgba(52, 211, 153, .14); color: var(--livre); }
+.faixa.moderada { background: rgba(245, 184, 61, .14); color: var(--moderada); }
+.faixa.cheia { background: rgba(242, 84, 91, .14); color: var(--cheia); }
+.regras-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.regras-grid article { padding: 22px; border-radius: var(--raio); background: var(--surface); border: 1px solid var(--line); }
+.regras-grid b { font: 600 13px var(--mono); color: var(--azul-2); }
+.regras-grid p { margin-top: 10px; color: #c4cce0; }
+
+/* Testes */
+.testes-topo { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; margin-bottom: 22px; }
+.placar { font: 600 15px var(--mono); }
+.testes { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+.teste { display: grid; grid-template-columns: 74px 1fr 120px; gap: 18px; align-items: start; padding: 18px 20px; border-radius: 16px; background: var(--surface); border: 1px solid var(--line); transition: border-color .3s, background .3s; }
+.teste .id { font: 600 15px var(--mono); }
+.teste .id small { display: block; font-size: 11px; color: var(--muted); font-weight: 500; margin-top: 4px; line-height: 1.4; }
+.teste dl { margin: 0; display: grid; grid-template-columns: 64px 1fr; gap: 4px 12px; font-size: 14px; }
+.teste dt { font: 500 12px var(--mono); color: var(--muted); text-transform: uppercase; padding-top: 2px; }
+.teste dd { margin: 0; color: #c4cce0; }
+.teste .obtido { color: var(--text); font-family: var(--mono); font-size: 13px; }
+.teste .res { justify-self: end; font: 600 13px var(--body); padding: 6px 12px; border-radius: 99px; background: var(--surface-2); color: var(--muted); }
+.teste.passou { border-color: rgba(52, 211, 153, .35); }
+.teste.passou .res { background: rgba(52, 211, 153, .14); color: var(--livre); }
+.teste.falhou { border-color: rgba(242, 84, 91, .45); }
+.teste.falhou .res { background: rgba(242, 84, 91, .14); color: var(--cheia); }
+
+/* Roadmap */
+.roadmap { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.etapa { border-radius: 24px; padding: 32px; border: 1px solid var(--line); background: var(--surface); }
+.etapa.atual { border-color: rgba(76, 141, 255, .4); background: linear-gradient(180deg, rgba(76,141,255,.1), var(--surface) 60%); }
+.etapa-tag { font: 500 12px var(--mono); text-transform: uppercase; letter-spacing: .1em; color: var(--azul-2); margin-bottom: 12px; }
+.etapa h3 { font-size: 30px; margin-bottom: 18px; }
+.etapa ul { margin: 0; padding-left: 20px; display: grid; gap: 8px; color: #c4cce0; }
+.etapa p { color: #c4cce0; }
+.fora { margin-top: 22px !important; font-size: 14px; padding-top: 18px; border-top: 1px solid var(--line); }
+.fora b { color: var(--text); }
+.tec { margin-top: 12px !important; font: 500 12px var(--mono); color: var(--muted) !important; }
+.cam3d { height: 280px; margin: -12px -12px 18px; border-radius: 18px; overflow: hidden; background: radial-gradient(100% 100% at 50% 30%, #13213f, var(--bg-2)); }
+.cam3d canvas { width: 100%; height: 100%; display: block; }
+
+/* Rodapé */
+.rodape { padding: 56px var(--gutter) 40px; border-top: 1px solid var(--line); max-width: 1320px; margin: 0 auto; display: flex; justify-content: space-between; gap: 24px; flex-wrap: wrap; align-items: end; }
+.rodape-marca { display: flex; gap: 20px; align-items: center; }
+.rodape-marca img { background: #fff; border-radius: 12px; padding: 8px; width: 80px; height: auto; }
+.rodape-marca p { font-size: 14px; color: var(--muted); }
+.rodape-marca b { color: var(--text); }
+.rodape-nota { font: 500 12px var(--mono); color: var(--muted); }
+
+/* Revelação (o JS adiciona .js-on) */
+.js-on [data-intro] { opacity: 0; }
+.js-on [data-reveal] { opacity: 0; transform: translateY(28px); transition: opacity .8s cubic-bezier(.2,.8,.2,1), transform .8s cubic-bezier(.2,.8,.2,1); }
+.js-on [data-reveal].visto { opacity: 1; transform: none; }
+
+/* Responsivo */
+@media (max-width: 1100px) {
+  .app-grid { grid-template-columns: 1fr; }
+  .colab { grid-template-columns: 1fr 1fr; }
+  .feed { grid-column: 1 / -1; }
+  .passos { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 820px) {
+  .nav nav { display: none; }
+  .problema-grid, .regras-grid, .roadmap { grid-template-columns: 1fr; }
+  .passos { grid-template-columns: 1fr 1fr; }
+  .passos span { margin-bottom: 18px; }
+  .hero { align-items: end; padding-bottom: 60px; }
+  .hero::before { background: linear-gradient(0deg, var(--bg) 0%, rgba(7,11,22,.92) 48%, rgba(7,11,22,.2) 80%); }
+  .hero-selo { position: static; margin-top: 18px; }
+  .mapa { min-height: 540px; }
+  .pin { padding: 5px 8px 6px; font-size: 11px; border-radius: 9px; }
+  .pin b { font-size: 12px; }
+  .pin small { display: none; }
+  .leitura { grid-template-columns: 1fr; }
+  .leitura-zona { border-left: 0; padding-left: 0; border-top: 1px solid var(--line); padding-top: 14px; }
+  .colab { grid-template-columns: 1fr; }
+  .teste { grid-template-columns: 1fr; gap: 10px; }
+  .teste .res { justify-self: start; }
+  .escala { height: auto; }
+  .faixa span { font-size: 15px; }
+}
+@media (max-width: 480px) {
+  .passos { grid-template-columns: 1fr; }
+  .destino-lista { grid-template-columns: 1fr 1fr; }
+  #d-pct { font-size: 52px; }
+  .carteira { grid-template-columns: 88px 1fr; }
+  .carteira canvas { width: 88px; height: 88px; }
+  .hero-stats dd { font-size: 28px; }
+  .teste dl { grid-template-columns: 1fr; }
+  .nav .btn-sm { padding: 9px 12px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; }
+}
+
+/* Kicker do hero: frase curta em caixa normal, sem o rótulo espaçado */
+.hero-kicker { font: 500 17px/1.4 var(--body); color: var(--azul-2); margin-bottom: 18px; }
+
+</style>
+  <script type="importmap">
+    { "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+    } }
+  </script>
+</head>
+<body>
+  <a class="pular" href="#app">Pular para o aplicativo</a>
+
+  <header class="nav" id="topo">
+    <a class="marca" href="#topo" aria-label="Safepark, início">
+      <span class="marca-p" aria-hidden="true">P</span> Safepark
+    </a>
+    <nav aria-label="Seções">
+      <a href="#problema">Problema</a>
+      <a href="#como">Como funciona</a>
+      <a href="#regras">Regras</a>
+      <a href="#testes">Testes</a>
+      <a href="#roadmap">Roadmap</a>
+    </nav>
+    <a class="btn btn-sm" href="#app">Abrir a v0.1</a>
+  </header>
+
+  <main>
+    <!-- HERO -->
+    <section class="hero" aria-labelledby="h1">
+      <div class="hero-3d" aria-hidden="true">
+        <canvas id="cena-hero"></canvas>
+        <div class="labels" id="labels-hero"></div>
+      </div>
+      <div class="hero-txt">
+        <p class="hero-kicker" data-intro>Centro do Recife, Zona Azul</p>
+        <h1 id="h1" data-intro>Saiba se tem vaga <em>antes</em> de sair de casa.</h1>
+        <p class="lead" data-intro>O Safepark mostra a ocupação da Zona Azul do Centro do Recife por micro-região. Quem mantém o mapa atualizado são os próprios motoristas, e quem colabora ganha dias grátis.</p>
+        <div class="cta" data-intro>
+          <a class="btn" href="#app">Testar a v0.1</a>
+          <a class="btn btn-ghost" href="#como">Ver como funciona</a>
+        </div>
+        <dl class="hero-stats" data-intro>
+          <div><dt>Zona Azul agora</dt><dd><span id="hero-zona">56%</span><small id="hero-zona-classe">Livre</small></dd></div>
+          <div><dt>Vagas no Centro</dt><dd>3.500+</dd></div>
+          <div><dt>Congestionamento</dt><dd>64,7%</dd></div>
+        </dl>
+      </div>
+      <p class="selo-simulado hero-selo"><span aria-hidden="true">●</span> Dados simulados da v0.1</p>
+    </section>
+
+    <!-- PROBLEMA -->
+    <section class="secao" id="problema" aria-labelledby="t-problema">
+      <div class="secao-cab" data-reveal>
+        <p class="eyebrow">01 · O problema</p>
+        <h2 id="t-problema">Rodar às cegas atrás de vaga piora o trânsito de todo mundo.</h2>
+      </div>
+      <div class="problema-grid">
+        <article class="cartao" data-reveal>
+          <p class="num">64,7%</p>
+          <p>de congestionamento registrado no Recife. Parte dele é gente dando voltas no quarteirão procurando onde parar.</p>
+        </article>
+        <article class="cartao" data-reveal>
+          <p class="num">3.500+</p>
+          <p>vagas de Zona Azul no Centro, mais as garagens. Nenhuma informa, antes de você sair, se está cheia.</p>
+        </article>
+        <article class="cartao" data-reveal>
+          <p class="num">0</p>
+          <p>informação antes da saída. Estudantes da CESAR School e trabalhadores só descobrem a lotação quando já estão lá.</p>
+        </article>
+      </div>
+      <blockquote class="historia" data-reveal>
+        <p>“Como motorista que vai de carro ao Centro do Recife, quero informar meu destino antes de sair de casa e ver a ocupação da Zona Azul e as micro-regiões mais livres, para decidir onde procurar vaga sem rodar às cegas.”</p>
+        <cite>História de usuário principal</cite>
+      </blockquote>
+    </section>
+
+    <!-- COMO FUNCIONA -->
+    <section class="secao" id="como" aria-labelledby="t-como">
+      <div class="secao-cab" data-reveal>
+        <p class="eyebrow">02 · Fluxo principal</p>
+        <h2 id="t-como">Cinco passos, uma tela só.</h2>
+      </div>
+      <ol class="passos">
+        <li data-reveal><span>1</span><h3>Abre antes de sair</h3><p>O motorista abre o Safepark ainda em casa.</p></li>
+        <li data-reveal><span>2</span><h3>Escolhe o destino</h3><p>Uma das quatro micro-regiões do Centro.</p></li>
+        <li data-reveal><span>3</span><h3>Confere a ocupação</h3><p>% do destino e da Zona Azul, com a classificação em texto.</p></li>
+        <li data-reveal><span>4</span><h3>Vê as mais livres</h3><p>Lista da menor para a maior ocupação.</p></li>
+        <li data-reveal><span>5</span><h3>Avisa e ganha pontos</h3><p>Ao liberar a vaga, avisa a saída. Aviso falso pode ser denunciado.</p></li>
+      </ol>
+    </section>
+
+    <!-- APP -->
+    <section class="secao app" id="app" aria-labelledby="t-app">
+      <div class="secao-cab" data-reveal>
+        <p class="eyebrow">03 · Aplicativo v0.1</p>
+        <h2 id="t-app">Experimente agora.</h2>
+        <p class="sub">Toque em uma micro-região no mapa ou nos botões. Gire o mapa arrastando.</p>
+      </div>
+
+      <div class="aviso-simulado" role="note">
+        <strong>Dados simulados.</strong> Os números de vagas e ocupação desta versão são fictícios e não representam o inventário real do Recife.
+        <button class="link" id="reiniciar" type="button">Reiniciar dados</button>
+      </div>
+
+      <div class="app-grid">
+        <div class="mapa" data-reveal>
+          <canvas id="cena-app" aria-label="Mapa 3D esquemático das micro-regiões do Centro do Recife"></canvas>
+          <div class="labels" id="labels-app"></div>
+          <p class="mapa-legenda"><span class="dot livre"></span>Livre &lt; 60% <span class="dot moderada"></span>Moderada 60–84% <span class="dot cheia"></span>Cheia ≥ 85% · 1 carro = 1 vaga ocupada</p>
+        </div>
+
+        <div class="painel">
+          <fieldset class="destinos">
+            <legend>Escolha o destino</legend>
+            <div id="botoes-destino" class="destino-lista"></div>
+          </fieldset>
+
+          <div class="leitura" aria-live="polite">
+            <div class="leitura-destino">
+              <p class="rotulo">Destino</p>
+              <p class="destino-nome" id="d-nome">Escolha uma micro-região</p>
+              <p class="destino-num"><span id="d-pct">--</span><span class="badge" id="d-classe">—</span></p>
+              <p class="destino-vagas" id="d-vagas">&nbsp;</p>
+              <div class="barra" aria-hidden="true"><i id="d-barra"></i><b style="left:60%"></b><b style="left:85%"></b></div>
+            </div>
+            <div class="leitura-zona">
+              <p class="rotulo">Zona Azul inteira</p>
+              <p class="zona-num"><span id="z-pct">56%</span> <span class="badge" id="z-classe">Livre</span></p>
+              <p class="destino-vagas" id="z-vagas">337 de 600</p>
+            </div>
+          </div>
+
+          <div class="livres">
+            <p class="rotulo">Mais livres agora</p>
+            <ol id="lista-livres"></ol>
+          </div>
+        </div>
+      </div>
+
+      <div class="colab">
+        <div class="carteira">
+          <canvas id="cena-moeda" aria-hidden="true"></canvas>
+          <div>
+            <div class="motorista-toggle" role="radiogroup" aria-label="Quem está usando">
+              <button type="button" role="radio" aria-checked="true" data-m="A">Motorista A</button>
+              <button type="button" role="radio" aria-checked="false" data-m="B">Motorista B</button>
+            </div>
+            <p class="pontos"><span id="m-pontos">0</span> pontos</p>
+            <p class="dias"><span id="m-dias">0</span> <span id="m-dias-txt">dias grátis</span> de Zona Azul</p>
+            <div class="progresso" aria-hidden="true"><i id="m-prog"></i></div>
+            <p class="dica">Cada aviso vale 10 pontos. A cada 100 pontos, 1 dia grátis.</p>
+          </div>
+        </div>
+
+        <div class="acoes">
+          <button class="btn btn-grande" id="avisar" type="button">Liberei uma vaga</button>
+          <p class="dica" id="avisar-dica">Escolha o destino onde você liberou a vaga.</p>
+          <p class="toast" id="toast" role="status" aria-live="polite"></p>
+        </div>
+
+        <div class="feed">
+          <p class="rotulo">Avisos de saída recentes</p>
+          <ul id="feed"><li class="vazio">Nenhum aviso ainda. Seja o primeiro a liberar uma vaga.</li></ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- REGRAS -->
+    <section class="secao" id="regras" aria-labelledby="t-regras">
+      <div class="secao-cab" data-reveal>
+        <p class="eyebrow">04 · Regras de negócio</p>
+        <h2 id="t-regras">Os limites pertencem à faixa mais ocupada.</h2>
+        <p class="sub">60% já é Moderada. 85% já é Cheia. A classificação aparece em texto, nunca só pela cor.</p>
+      </div>
+      <div class="escala" data-reveal aria-hidden="true">
+        <div class="faixa livre" style="flex:60"><span>Livre</span><small>0–59%</small></div>
+        <div class="faixa moderada" style="flex:25"><span>Moderada</span><small>60–84%</small></div>
+        <div class="faixa cheia" style="flex:16"><span>Cheia</span><small>85–100%</small></div>
+      </div>
+      <div class="regras-grid">
+        <article data-reveal><b>RN01</b><p>Quatro micro-regiões fixas do Centro, com dados simulados.</p></article>
+        <article data-reveal><b>RN02</b><p>Ocupação = ocupadas ÷ totais × 100, arredondada ao inteiro.</p></article>
+        <article data-reveal><b>RN03</b><p>Zona Azul = soma das ocupadas ÷ soma das totais. Hoje: 337 de 600 = 56%.</p></article>
+        <article data-reveal><b>RN04</b><p>Livre abaixo de 60%, Moderada de 60% a 84%, Cheia a partir de 85%.</p></article>
+        <article data-reveal><b>RN05</b><p>Mais livres primeiro. Empate vai em ordem alfabética.</p></article>
+        <article data-reveal><b>RN06</b><p>Aviso de saída tira 1 vaga ocupada. Sem vaga ocupada, é recusado.</p></article>
+        <article data-reveal><b>RN07</b><p>Aviso válido = +10 pontos. 100 pontos = 1 dia grátis.</p></article>
+        <article data-reveal><b>RN08</b><p>Só se denuncia aviso de outro motorista, uma vez por aviso.</p></article>
+        <article data-reveal><b>RN09</b><p>Denúncia aceita: vaga volta a ocupada e o autor perde 30 pontos. Nunca abaixo de 0.</p></article>
+      </div>
+    </section>
+
+    <!-- TESTES -->
+    <section class="secao" id="testes" aria-labelledby="t-testes">
+      <div class="secao-cab" data-reveal>
+        <p class="eyebrow">05 · Critérios de aceitação</p>
+        <h2 id="t-testes">Dez cenários, conferidos ao vivo.</h2>
+        <p class="sub">Cada cenário roda contra o mesmo código do aplicativo, num estado limpo.</p>
+      </div>
+      <div class="testes-topo">
+        <button class="btn" id="rodar" type="button">Rodar CA01 a CA10</button>
+        <p id="placar" class="placar" aria-live="polite"></p>
+      </div>
+      <ol class="testes" id="lista-testes"></ol>
+    </section>
+
+    <!-- ROADMAP -->
+    <section class="secao" id="roadmap" aria-labelledby="t-roadmap">
+      <div class="secao-cab" data-reveal>
+        <p class="eyebrow">06 · Roadmap</p>
+        <h2 id="t-roadmap">Primeiro os motoristas. Depois as câmeras.</h2>
+      </div>
+      <div class="roadmap">
+        <article class="etapa atual" data-reveal>
+          <p class="etapa-tag">Etapa 1 · agora</p>
+          <h3>MVP web colaborativo</h3>
+          <ul>
+            <li>Mapa esquemático com quatro micro-regiões</li>
+            <li>Destino, ocupação, classificação e lista das mais livres</li>
+            <li>Aviso de saída com pontos e dias grátis</li>
+            <li>Denúncia de vaga ocupada com penalidade</li>
+          </ul>
+          <p class="fora"><b>Fora da v0.1:</b> câmeras, GPS e rotas, login e banco de dados, pagamento real e integração com o órgão de trânsito.</p>
+          <p class="tec">HTML, CSS e JavaScript · GitHub Pages · dados em arquivo separado da interface</p>
+        </article>
+        <article class="etapa futura" data-reveal>
+          <div class="cam3d"><canvas id="cena-camera" aria-hidden="true"></canvas></div>
+          <p class="etapa-tag">Etapa 2 · após validação</p>
+          <h3>Câmeras com visão computacional</h3>
+          <p>Câmeras estratégicas detectam vagas livres em tempo real. Como a ocupação já vive numa camada de dados com campo de origem (RF08), a mesma tela passa a ser alimentada pela nova fonte, sem refazer nada.</p>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <footer class="rodape">
+    <div class="rodape-marca">
+      <img src="data:image/png;base64,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" alt="CESAR School" width="96" height="84" loading="lazy">
+      <div>
+        <p><b>Safepark</b> · Inteligência de Vagas na Zona Azul</p>
+        <p>AV2 · Entrega 1 · ADM Tech · Docente José Adeilmo Nunes Barbosa Junior</p>
+        <p>Lente 8 · Mobilidade Inteligente &amp; Programação</p>
+      </div>
+    </div>
+    <p class="rodape-nota">Todos os dados de vagas, ocupação e pontos desta página são simulados para a v0.1.</p>
+  </footer>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
+  <script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
+/* ===== js/data.js ===== */
+// Camada de dados do Safepark (RF08).
+// A interface só lê daqui. Na Etapa 2, basta trocar a fonte (origem: "camera")
+// e os números chegam pela mesma estrutura, sem refazer a tela.
+
+const FONTE = {
+  origem: 'simulado',
+  descricao: 'Dados simulados para a v0.1. Não representam o inventário real de vagas do Recife.',
+  atualizadoEm: '16/11/2026',
+};
+
+const REGIOES = [
+  { id: 'recife-antigo', nome: 'Recife Antigo', apelido: 'CESAR School', total: 200, ocupadas: 120, origem: 'simulado' },
+  { id: 'santo-antonio', nome: 'Santo Antônio', apelido: 'Pátio do Livramento', total: 120, ocupadas: 60, origem: 'simulado' },
+  { id: 'sao-jose', nome: 'São José', apelido: 'Mercado de São José', total: 100, ocupadas: 85, origem: 'simulado' },
+  { id: 'boa-vista', nome: 'Boa Vista', apelido: 'Rua da Aurora', total: 180, ocupadas: 72, origem: 'simulado' },
+];
+
+const REGRAS = {
+  pontosPorAviso: 10,     // RN07
+  pontosPorDiaGratis: 100, // RN07
+  perdaPorDenuncia: 30,   // RN09 (10 do aviso + 20 de penalidade)
+  limiteModerada: 60,     // RN04
+  limiteCheia: 85,        // RN04
+};
+
+/* ===== js/logic.js ===== */
+// Regras de negócio do Safepark v0.1 (RN01 a RN09). Funções puras sobre um estado.
+
+// RN02 e RN03: ocupação arredondada ao inteiro mais próximo
+const pct = (ocupadas, total) => (total ? Math.round((ocupadas / total) * 100) : 0);
+
+// RN04: Livre < 60; Moderada 60–84; Cheia >= 85
+function classe(p) {
+  if (p >= REGRAS.limiteCheia) return 'Cheia';
+  if (p >= REGRAS.limiteModerada) return 'Moderada';
+  return 'Livre';
+}
+
+function criarEstado(regioes = REGIOES) {
+  return {
+    fonte: FONTE,
+    regioes: regioes.map((r) => ({ ...r })),
+    motoristas: {
+      A: { id: 'A', nome: 'Motorista A', pontos: 0 },
+      B: { id: 'B', nome: 'Motorista B', pontos: 0 },
+    },
+    avisos: [],
+    seq: 0,
+  };
+}
+
+const regiao = (e, id) => e.regioes.find((r) => r.id === id);
+
+function resumo(r) {
+  const p = pct(r.ocupadas, r.total);
+  return { ...r, pct: p, classe: classe(p) };
+}
+
+// RN03
+function zonaAzul(e) {
+  const total = e.regioes.reduce((s, r) => s + r.total, 0);
+  const ocupadas = e.regioes.reduce((s, r) => s + r.ocupadas, 0);
+  const p = pct(ocupadas, total);
+  return { total, ocupadas, pct: p, classe: classe(p) };
+}
+
+// RN05: menor ocupação primeiro; empate em ordem alfabética
+function maisLivres(e) {
+  return e.regioes
+    .map(resumo)
+    .sort((a, b) => a.pct - b.pct || a.nome.localeCompare(b.nome, 'pt-BR'));
+}
+
+const diasGratis = (pontos) => Math.floor(pontos / REGRAS.pontosPorDiaGratis);
+
+// RN06 e RN07
+function avisarSaida(e, motoristaId, regiaoId) {
+  const r = regiao(e, regiaoId);
+  if (!r) return { ok: false, msg: 'Micro-região não encontrada.' };
+  if (r.ocupadas <= 0) {
+    return { ok: false, msg: `Não há vaga ocupada em ${r.nome}. A ocupação e os pontos não mudaram.` };
+  }
+  r.ocupadas -= 1;
+  const m = e.motoristas[motoristaId];
+  m.pontos += REGRAS.pontosPorAviso;
+  const aviso = { id: ++e.seq, autor: motoristaId, regiao: regiaoId, status: 'válido', denunciadoPor: null };
+  e.avisos.unshift(aviso);
+  return { ok: true, aviso, msg: `Saída registrada em ${r.nome}. ${m.nome} ganhou ${REGRAS.pontosPorAviso} pontos.` };
+}
+
+// RN08 e RN09
+function denunciar(e, denuncianteId, avisoId) {
+  const a = e.avisos.find((x) => x.id === avisoId);
+  if (!a) return { ok: false, msg: 'Aviso não encontrado.' };
+  if (a.autor === denuncianteId) return { ok: false, msg: 'Não é possível denunciar o próprio aviso.' };
+  if (a.status === 'contestado') return { ok: false, msg: 'Este aviso já foi denunciado.' };
+  const r = regiao(e, a.regiao);
+  a.status = 'contestado';
+  a.denunciadoPor = denuncianteId;
+  r.ocupadas = Math.min(r.total, r.ocupadas + 1);
+  const autor = e.motoristas[a.autor];
+  const antes = autor.pontos;
+  autor.pontos = Math.max(0, autor.pontos - REGRAS.perdaPorDenuncia);
+  return { ok: true, msg: `Denúncia aceita. O aviso em ${r.nome} ficou contestado, a vaga voltou a contar como ocupada e ${autor.nome} perdeu ${antes - autor.pontos} pontos.` };
+}
+
+const fmtVagas = (o, t) => `${o} de ${t}`; // RNF02
+
+/* ===== js/criterios.js ===== */
+// Critérios de aceitação CA01 a CA10, executados contra as mesmas regras do app.
+
+const R = (e, id) => resumo(regiao(e, id));
+
+const CRITERIOS = [
+  {
+    id: 'CA01', ref: 'RF01 · RN01 · RNF06',
+    dado: 'O aplicativo aberto com os dados de referência.',
+    quando: 'O motorista consulta o mapa.',
+    entao: 'Mostra as quatro micro-regiões com vagas totais e ocupadas e o aviso de dados simulados.',
+    run() {
+      const e = criarEstado();
+      const ok = e.regioes.length === 4 && e.regioes.every((r) => r.total > 0 && r.ocupadas >= 0) && FONTE.origem === 'simulado';
+      return { ok, obtido: `${e.regioes.length} micro-regiões · fonte "${FONTE.origem}"` };
+    },
+  },
+  {
+    id: 'CA02', ref: 'RF02 · RF03 · RN02–RN04',
+    dado: 'O mapa carregado.',
+    quando: 'O motorista escolhe Recife Antigo como destino.',
+    entao: 'Mostra 60% (120 de 200), classificação Moderada e Zona Azul em 56% (337 de 600).',
+    run() {
+      const e = criarEstado(); const r = R(e, 'recife-antigo'); const z = zonaAzul(e);
+      const ok = r.pct === 60 && r.ocupadas === 120 && r.total === 200 && r.classe === 'Moderada' && z.pct === 56 && z.ocupadas === 337 && z.total === 600;
+      return { ok, obtido: `${r.pct}% (${r.ocupadas} de ${r.total}), ${r.classe} · Zona Azul ${z.pct}% (${z.ocupadas} de ${z.total})` };
+    },
+  },
+  {
+    id: 'CA03', ref: 'RF03 · RF04 · RN02–RN05',
+    dado: 'O mapa carregado.',
+    quando: 'O motorista escolhe São José como destino.',
+    entao: 'Mostra 85% (85 de 100) e classificação Cheia, e indica Boa Vista (40%) como a mais livre.',
+    run() {
+      const e = criarEstado(); const r = R(e, 'sao-jose'); const top = maisLivres(e)[0];
+      const ok = r.pct === 85 && r.classe === 'Cheia' && top.nome === 'Boa Vista' && top.pct === 40;
+      return { ok, obtido: `${r.pct}% (${r.ocupadas} de ${r.total}), ${r.classe} · mais livre: ${top.nome} (${top.pct}%)` };
+    },
+  },
+  {
+    id: 'CA04', ref: 'RF04 · RN05',
+    dado: 'O mapa carregado.',
+    quando: 'O motorista abre a lista de micro-regiões mais livres.',
+    entao: 'Mostra a ordem Boa Vista (40%), Santo Antônio (50%), Recife Antigo (60%) e São José (85%).',
+    run() {
+      const lista = maisLivres(criarEstado());
+      const txt = lista.map((r) => `${r.nome} (${r.pct}%)`).join(', ');
+      return { ok: txt === 'Boa Vista (40%), Santo Antônio (50%), Recife Antigo (60%), São José (85%)', obtido: txt };
+    },
+  },
+  {
+    id: 'CA05', ref: 'RF05 · RF06 · RN06 · RN07',
+    dado: 'O Motorista A com 0 pontos.',
+    quando: 'O Motorista A avisa a saída de uma vaga em Santo Antônio.',
+    entao: 'Santo Antônio passa a 59 de 120 (49%, Livre) e o Motorista A fica com 10 pontos.',
+    run() {
+      const e = criarEstado(); avisarSaida(e, 'A', 'santo-antonio'); const r = R(e, 'santo-antonio'); const p = e.motoristas.A.pontos;
+      return { ok: r.ocupadas === 59 && r.pct === 49 && r.classe === 'Livre' && p === 10, obtido: `${r.ocupadas} de ${r.total} (${r.pct}%, ${r.classe}) · ${p} pontos` };
+    },
+  },
+  {
+    id: 'CA06', ref: 'RF05 · RF06 · RN07',
+    dado: 'O Motorista A com 90 pontos.',
+    quando: 'O Motorista A avisa uma saída válida.',
+    entao: 'O saldo chega a 100 pontos e o aplicativo mostra 1 dia grátis.',
+    run() {
+      const e = criarEstado(); e.motoristas.A.pontos = 90; avisarSaida(e, 'A', 'boa-vista');
+      const p = e.motoristas.A.pontos; const d = diasGratis(p);
+      return { ok: p === 100 && d === 1, obtido: `${p} pontos · ${d} dia grátis` };
+    },
+  },
+  {
+    id: 'CA07', ref: 'RF05 · RN06',
+    dado: 'Uma micro-região sem vaga ocupada registrada.',
+    quando: 'O motorista tenta avisar uma saída nela.',
+    entao: 'Informa que não há vaga ocupada nessa micro-região. A ocupação segue em 0% e os pontos não mudam.',
+    run() {
+      const e = criarEstado(); regiao(e, 'santo-antonio').ocupadas = 0;
+      const res = avisarSaida(e, 'A', 'santo-antonio'); const r = R(e, 'santo-antonio');
+      return { ok: !res.ok && r.pct === 0 && e.motoristas.A.pontos === 0, obtido: `"${res.msg.split('.')[0]}." · ${r.pct}% · ${e.motoristas.A.pontos} pontos` };
+    },
+  },
+  {
+    id: 'CA08', ref: 'RF07 · RN06 · RN09',
+    dado: 'Um aviso do Motorista A em Santo Antônio (59 de 120) e o Motorista A com 50 pontos.',
+    quando: 'O Motorista B denuncia que a vaga está ocupada.',
+    entao: 'O aviso fica contestado, Santo Antônio volta a 60 de 120 (50%) e o Motorista A fica com 20 pontos.',
+    run() {
+      const e = criarEstado(); const { aviso } = avisarSaida(e, 'A', 'santo-antonio'); e.motoristas.A.pontos = 50;
+      denunciar(e, 'B', aviso.id); const r = R(e, 'santo-antonio');
+      return { ok: aviso.status === 'contestado' && r.ocupadas === 60 && r.pct === 50 && e.motoristas.A.pontos === 20, obtido: `aviso ${aviso.status} · ${r.ocupadas} de ${r.total} (${r.pct}%) · ${e.motoristas.A.pontos} pontos` };
+    },
+  },
+  {
+    id: 'CA09', ref: 'RF07 · RN08',
+    dado: 'Um aviso de saída do Motorista A.',
+    quando: 'O Motorista A tenta denunciar o próprio aviso.',
+    entao: 'Informa que não é possível denunciar o próprio aviso. Ocupação e pontos não mudam.',
+    run() {
+      const e = criarEstado(); const { aviso } = avisarSaida(e, 'A', 'boa-vista');
+      const antes = [regiao(e, 'boa-vista').ocupadas, e.motoristas.A.pontos];
+      const res = denunciar(e, 'A', aviso.id);
+      const depois = [regiao(e, 'boa-vista').ocupadas, e.motoristas.A.pontos];
+      return { ok: !res.ok && antes[0] === depois[0] && antes[1] === depois[1], obtido: `"${res.msg}" · ${depois[0]} ocupadas · ${depois[1]} pontos` };
+    },
+  },
+  {
+    id: 'CA10', ref: 'RF07 · RN09',
+    dado: 'O Motorista A com 25 pontos e um aviso seu denunciado.',
+    quando: 'A denúncia é aceita.',
+    entao: 'O Motorista A fica com 0 pontos, sem saldo negativo.',
+    run() {
+      const e = criarEstado(); const { aviso } = avisarSaida(e, 'A', 'recife-antigo'); e.motoristas.A.pontos = 25;
+      denunciar(e, 'B', aviso.id);
+      return { ok: e.motoristas.A.pontos === 0, obtido: `${e.motoristas.A.pontos} pontos` };
+    },
+  },
+];
+
+
+/* ===== js/scene.js ===== */
+// Cenas 3D do Safepark: maquete do Centro do Recife, câmera da Etapa 2 e moeda de pontos.
+
+const REDUZIR_3D = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const COR_CLASSE = { Livre: 0x34d399, Moderada: 0xf5b83d, Cheia: 0xf2545b };
+
+// Maquete esquemática (não geográfica): ilhas e rio inspirados no Centro do Recife
+const SX = 0.26, SZ = 0.46;
+const LAYOUT = {
+  'boa-vista': { x: -6.3, z: -1.6, cols: 18, rows: 10 },
+  'santo-antonio': { x: 0.2, z: -1.0, cols: 15, rows: 8 },
+  'sao-jose': { x: 0.2, z: 4.6, cols: 10, rows: 10 },
+  'recife-antigo': { x: 6.9, z: -1.4, cols: 20, rows: 10 },
+};
+const PALETA_CARROS = [0xe8ecf5, 0xb7c0d3, 0x2b3448, 0x4c8dff, 0xc9473d, 0x8a94a8, 0xdfe5ee, 0x1d2333, 0x6f7b93, 0xd9a441];
+
+function rng(seed) {
+  let s = seed >>> 0;
+  return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296);
+}
+function hash(str) { let h = 2166136261; for (const c of str) h = Math.imul(h ^ c.charCodeAt(0), 16777619); return h >>> 0; }
+
+function baseRenderer(canvas, alpha = true) {
+  const r = new THREE.WebGLRenderer({ canvas, antialias: true, alpha, powerPreference: 'high-performance' });
+  r.setPixelRatio(Math.min(window.devicePixelRatio, 1.75));
+  r.outputColorSpace = THREE.SRGBColorSpace;
+  r.toneMapping = THREE.ACESFilmicToneMapping;
+  r.toneMappingExposure = 1.05;
+  return r;
+}
+
+// Liga/desliga o loop quando sai da tela ou a aba fica oculta
+function loop(canvas, tick, renderer, camera, onResize) {
+  let visivel = false, raf = 0, last = performance.now();
+  const frame = (t) => {
+    raf = requestAnimationFrame(frame);
+    const dt = Math.min((t - last) / 1000, 0.05); last = t;
+    tick(dt, t / 1000);
+  };
+  const start = () => { if (!raf && visivel && !document.hidden) { last = performance.now(); raf = requestAnimationFrame(frame); } };
+  const stop = () => { cancelAnimationFrame(raf); raf = 0; };
+  new IntersectionObserver(([en]) => { visivel = en.isIntersecting; visivel ? start() : stop(); }, { rootMargin: '100px' }).observe(canvas);
+  document.addEventListener('visibilitychange', () => (document.hidden ? stop() : start()));
+  const ro = new ResizeObserver(() => {
+    const w = canvas.clientWidth, h = canvas.clientHeight;
+    if (!w || !h) return;
+    renderer.setSize(w, h, false);
+    camera.aspect = w / h; camera.updateProjectionMatrix();
+    onResize?.(w, h);
+    if (!raf) tick(0, performance.now() / 1000);
+  });
+  ro.observe(canvas);
+}
+
+/* ------------------------------------------------------------------ */
+/* Maquete do Centro                                                    */
+/* ------------------------------------------------------------------ */
+function createCity(canvas, { regioes, labels, interativo = false, onPick, orbita = true } = {}) {
+  const renderer = baseRenderer(canvas);
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+  const scene = new THREE.Scene();
+  scene.fog = new THREE.Fog(0x070b16, 26, 52);
+  const pmrem = new THREE.PMREMGenerator(renderer);
+  scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+
+  const camera = new THREE.PerspectiveCamera(32, 1, 0.1, 120);
+  const alvo = new THREE.Vector3(0.4, 0, 1.0);
+  const alvoDesejado = alvo.clone();
+  camera.position.set(4, 15, 21);
+
+  // Luz
+  scene.add(new THREE.HemisphereLight(0x9db8ff, 0x0b1020, 0.55));
+  const sol = new THREE.DirectionalLight(0xfff1dc, 2.2);
+  sol.position.set(-9, 16, 8);
+  sol.castShadow = true;
+  sol.shadow.mapSize.set(2048, 2048);
+  Object.assign(sol.shadow.camera, { left: -14, right: 14, top: 12, bottom: -12, near: 1, far: 50 });
+  sol.shadow.bias = -0.0004; sol.shadow.radius = 4;
+  scene.add(sol);
+  const contra = new THREE.DirectionalLight(0x4c8dff, 0.9);
+  contra.position.set(10, 6, -12);
+  scene.add(contra);
+
+  // Água (rios Capibaribe e Beberibe, estilizados)
+  const agua = new THREE.Mesh(
+    new THREE.PlaneGeometry(120, 120),
+    new THREE.MeshStandardMaterial({ color: 0x0a1a35, roughness: 0.18, metalness: 0.35 })
+  );
+  agua.rotation.x = -Math.PI / 2; agua.position.y = -0.42; agua.receiveShadow = true;
+  scene.add(agua);
+
+  const matAsfalto = new THREE.MeshStandardMaterial({ color: 0x1a2131, roughness: 0.92 });
+  const matBorda = new THREE.MeshStandardMaterial({ color: 0x2a3348, roughness: 0.8 });
+  const matPredio = new THREE.MeshStandardMaterial({ color: 0xc8d1e2, roughness: 0.65, metalness: 0.05 });
+  const matPredio2 = new THREE.MeshStandardMaterial({ color: 0x8592ab, roughness: 0.7 });
+  const matVaga = new THREE.MeshStandardMaterial({ color: 0x323c54, roughness: 0.85 });
+  const matPonte = new THREE.MeshStandardMaterial({ color: 0x5b6680, roughness: 0.7 });
+
+  const plataformas = [];
+  const info = {}; // por região: centro, offset de índices, pino, anel
+  let offset = 0;
+  const total = regioes.reduce((s, r) => s + r.total, 0);
+
+  // Vagas e carros (instanciados: um carro por vaga ocupada)
+  const geoVaga = new THREE.PlaneGeometry(SX * 0.84, SZ * 0.86); geoVaga.rotateX(-Math.PI / 2);
+  const vagas = new THREE.InstancedMesh(geoVaga, matVaga, total);
+  vagas.receiveShadow = true;
+  const geoCorpo = new RoundedBoxGeometry(0.17, 0.075, 0.34, 2, 0.03);
+  const geoCabine = new RoundedBoxGeometry(0.145, 0.065, 0.17, 2, 0.025);
+  const corpos = new THREE.InstancedMesh(geoCorpo, new THREE.MeshStandardMaterial({ roughness: 0.32, metalness: 0.55 }), total);
+  const cabines = new THREE.InstancedMesh(geoCabine, new THREE.MeshStandardMaterial({ color: 0x0c1220, roughness: 0.08, metalness: 0.9 }), total);
+  corpos.castShadow = cabines.castShadow = true;
+  scene.add(vagas, corpos, cabines);
+
+  const slots = []; // {x,z,rot,s,alvo,regiao}
+  const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), v = new THREE.Vector3(), sc = new THREE.Vector3();
+  const cor = new THREE.Color();
+
+  for (const r of regioes) {
+    const L = LAYOUT[r.id];
+    const rand = rng(hash(r.id));
+    const gw = L.cols * SX, gd = L.rows * SZ;
+    const pw = gw + 0.9, pd = gd + 2.1;
+    const pz = L.z - 0.6; // faixa de prédios ao fundo
+
+    const base = new THREE.Mesh(new RoundedBoxGeometry(pw, 0.6, pd, 4, 0.16), matAsfalto);
+    base.position.set(L.x, -0.3, pz);
+    base.receiveShadow = true; base.castShadow = true;
+    base.userData.id = r.id;
+    scene.add(base); plataformas.push(base);
+
+    const borda = new THREE.Mesh(new RoundedBoxGeometry(pw + 0.12, 0.2, pd + 0.12, 3, 0.08), matBorda);
+    borda.position.set(L.x, -0.5, pz);
+    scene.add(borda);
+
+    // Prédios ao fundo da quadra
+    const fundoZ = L.z - gd / 2 - 0.75;
+    let x = L.x - pw / 2 + 0.3;
+    while (x < L.x + pw / 2 - 0.3) {
+      const w = 0.35 + rand() * 0.55, h = 0.35 + rand() * (r.id === 'boa-vista' ? 2.2 : 1.2), d = 0.5 + rand() * 0.35;
+      if (x + w > L.x + pw / 2 - 0.2) break;
+      const b = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), rand() > 0.3 ? matPredio : matPredio2);
+      b.position.set(x + w / 2, h / 2, fundoZ + (rand() - 0.5) * 0.2);
+      b.castShadow = b.receiveShadow = true;
+      scene.add(b);
+      x += w + 0.06 + rand() * 0.1;
+    }
+
+    // Ordem determinística de ocupação das vagas
+    const ordem = [...Array(r.total).keys()];
+    for (let i = ordem.length - 1; i > 0; i--) { const j = Math.floor(rand() * (i + 1)); [ordem[i], ordem[j]] = [ordem[j], ordem[i]]; }
+
+    for (let i = 0; i < r.total; i++) {
+      const col = i % L.cols, row = Math.floor(i / L.cols);
+      const sx = L.x + (col - (L.cols - 1) / 2) * SX;
+      const sz = L.z + (row - (L.rows - 1) / 2) * SZ + 0.25;
+      const idx = offset + i;
+      m4.makeTranslation(sx, 0.006, sz);
+      vagas.setMatrixAt(idx, m4);
+      cor.setHex(PALETA_CARROS[Math.floor(rand() * PALETA_CARROS.length)]);
+      corpos.setColorAt(idx, cor);
+      slots[idx] = { x: sx, z: sz, rot: rand() > 0.5 ? 0 : Math.PI, s: 0, alvo: 0 };
+    }
+
+    // Pino de ocupação (altura e cor seguem a classificação)
+    const pinoMat = new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0x34d399, emissiveIntensity: 1.4, roughness: 0.3 });
+    const pino = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 1, 16), pinoMat);
+    const topo = new THREE.Mesh(new THREE.SphereGeometry(0.2, 24, 16), pinoMat);
+    const halo = new THREE.Mesh(new THREE.RingGeometry(0.32, 0.4, 48), new THREE.MeshBasicMaterial({ color: 0x34d399, transparent: true, opacity: 0.7, side: THREE.DoubleSide }));
+    scene.add(pino, topo, halo);
+
+    // Anel de destino selecionado
+    const anel = new THREE.Mesh(
+      new THREE.RingGeometry(Math.max(gw, gd) * 0.62, Math.max(gw, gd) * 0.62 + 0.09, 96),
+      new THREE.MeshBasicMaterial({ color: 0x4c8dff, transparent: true, opacity: 0, side: THREE.DoubleSide })
+    );
+    anel.rotation.x = -Math.PI / 2; anel.position.set(L.x, 0.03, L.z + 0.25);
+    scene.add(anel);
+
+    info[r.id] = { L, offset, ordem, pino, topo, halo, anel, pinoMat, alturaAtual: 1, alturaAlvo: 1, centro: new THREE.Vector3(L.x, 0, L.z) };
+    offset += r.total;
+  }
+  vagas.instanceMatrix.needsUpdate = true;
+  corpos.instanceColor.needsUpdate = true;
+
+  // Pontes
+  const ponte = (x1, x2, z) => {
+    const p = new THREE.Mesh(new THREE.BoxGeometry(Math.abs(x2 - x1), 0.12, 0.5), matPonte);
+    p.position.set((x1 + x2) / 2, -0.12, z); p.castShadow = p.receiveShadow = true; scene.add(p);
+  };
+  ponte(-3.6, -1.6, -0.2); ponte(-3.6, -1.6, -2.4); ponte(2.0, 3.9, -0.6); ponte(2.0, 3.9, -2.6);
+
+  // Labels HTML acompanham os pinos
+  const tmp = new THREE.Vector3();
+  function posicionarLabels() {
+    if (!labels) return;
+    const w = canvas.clientWidth, h = canvas.clientHeight;
+    for (const [id, el] of Object.entries(labels)) {
+      const I = info[id]; if (!I) continue;
+      tmp.copy(I.topo.position); tmp.y += 0.45; tmp.project(camera);
+      el.style.transform = `translate(-50%,-100%) translate(${(tmp.x * 0.5 + 0.5) * w}px, ${(-tmp.y * 0.5 + 0.5) * h}px)`;
+      el.style.opacity = tmp.z < 1 ? '' : '0';
+    }
+  }
+
+  // Controles
+  let controls = null;
+  if (interativo) {
+    controls = new OrbitControls(camera, canvas);
+    controls.enableDamping = true; controls.dampingFactor = 0.08;
+    controls.minDistance = 9; controls.maxDistance = 34;
+    controls.minPolarAngle = 0.35; controls.maxPolarAngle = 1.2;
+    controls.enablePan = false;
+    controls.target.copy(alvo);
+    let down = null;
+    canvas.addEventListener('pointerdown', (e) => (down = [e.clientX, e.clientY]));
+    canvas.addEventListener('pointerup', (e) => {
+      if (!down || Math.hypot(e.clientX - down[0], e.clientY - down[1]) > 5) return;
+      const rect = canvas.getBoundingClientRect();
+      const ray = new THREE.Raycaster();
+      ray.setFromCamera({ x: ((e.clientX - rect.left) / rect.width) * 2 - 1, y: -((e.clientY - rect.top) / rect.height) * 2 + 1 }, camera);
+      const hit = ray.intersectObjects(plataformas)[0];
+      if (hit) onPick?.(hit.object.userData.id);
+    });
+  }
+
+  let selecionado = null, primeira = true;
+  function setData(regs, destino) {
+    selecionado = destino;
+    for (const r of regs) {
+      const I = info[r.id]; if (!I) continue;
+      const ocupadosSet = new Set(I.ordem.slice(0, r.ocupadas));
+      for (let i = 0; i < r.total; i++) {
+        const s = slots[I.offset + i];
+        s.alvo = ocupadosSet.has(i) ? 1 : 0;
+        if (primeira || REDUZIR_3D) s.s = s.alvo;
+      }
+      const p = r.total ? Math.round((r.ocupadas / r.total) * 100) : 0;
+      const k = p >= 85 ? 'Cheia' : p >= 60 ? 'Moderada' : 'Livre';
+      I.pinoMat.emissive.setHex(COR_CLASSE[k]);
+      I.halo.material.color.setHex(COR_CLASSE[k]);
+      I.alturaAlvo = 0.6 + (p / 100) * 2.6;
+      if (primeira || REDUZIR_3D) I.alturaAtual = I.alturaAlvo;
+    }
+    if (interativo && destino && info[destino]) alvoDesejado.copy(info[destino].centro).lerp(new THREE.Vector3(0.4, 0, 1), 0.45);
+    primeira = false;
+    atualizarCarros(true);
+  }
+
+  function atualizarCarros(forcar) {
+    let mudou = forcar;
+    for (let i = 0; i < slots.length; i++) {
+      const s = slots[i];
+      if (Math.abs(s.s - s.alvo) > 0.001) { s.s += (s.alvo - s.s) * 0.12; if (Math.abs(s.s - s.alvo) < 0.01) s.s = s.alvo; mudou = true; }
+      else if (!forcar) continue;
+      const e = s.s;
+      const y = 0.05 + (1 - e) * 0.9;
+      q.setFromAxisAngle(v.set(0, 1, 0), s.rot);
+      sc.setScalar(e < 0.02 ? 0 : 0.6 + e * 0.4);
+      m4.compose(v.set(s.x, y, s.z), q, sc); corpos.setMatrixAt(i, m4);
+      m4.compose(v.set(s.x + Math.sin(s.rot) * -0.02, y + 0.065 * sc.x, s.z + Math.cos(s.rot) * -0.02), q, sc); cabines.setMatrixAt(i, m4);
+    }
+    if (mudou) { corpos.instanceMatrix.needsUpdate = true; cabines.instanceMatrix.needsUpdate = true; }
+  }
+
+  let az = -0.35;
+  function tick(dt, t) {
+    atualizarCarros(false);
+    for (const [id, I] of Object.entries(info)) {
+      I.alturaAtual += (I.alturaAlvo - I.alturaAtual) * Math.min(1, dt * 6 || 1);
+      const h = I.alturaAtual, cx = I.L.x + I.L.cols * SX * 0.5 - 0.15, cz = I.L.z - I.L.rows * SZ * 0.5 + 0.4;
+      I.pino.scale.y = h; I.pino.position.set(cx, h / 2, cz);
+      I.topo.position.set(cx, h + 0.05, cz);
+      I.halo.position.copy(I.topo.position); I.halo.lookAt(camera.position);
+      I.halo.scale.setScalar(1 + (REDUZIR_3D ? 0 : Math.sin(t * 2.2 + I.offset) * 0.12));
+      const op = id === selecionado ? 0.55 + (REDUZIR_3D ? 0 : Math.sin(t * 3) * 0.3) : 0;
+      I.anel.material.opacity += (op - I.anel.material.opacity) * 0.15;
+    }
+    if (controls) {
+      controls.target.lerp(alvoDesejado, Math.min(1, dt * 2.5));
+      controls.update();
+    } else {
+      if (orbita && !REDUZIR_3D) az += dt * 0.045;
+      const raio = 27, polar = 0.98;
+      camera.position.set(alvo.x + raio * Math.sin(polar) * Math.sin(az), raio * Math.cos(polar), alvo.z + raio * Math.sin(polar) * Math.cos(az));
+      camera.lookAt(alvo);
+    }
+    renderer.render(scene, camera);
+    posicionarLabels();
+  }
+
+  if (interativo) {
+    const ajustar = () => { const a = canvas.clientWidth / Math.max(1, canvas.clientHeight); if (a < 1) camera.position.set(alvo.x + 21, 39, alvo.z + 1.2); // em pé: eixo leste-oeste na vertical
+      else { const d = a < 1.4 ? 1.3 : 1.02; camera.position.set(1.5 * d, 18 * d, 21 * d); }
+      const d = a < 1 ? 1.6 : 1.3; controls.maxDistance = 34 * d; controls.update(); };
+    ajustar(); new ResizeObserver(ajustar).observe(canvas);
+  }
+  setData(regioes, null);
+  // No hero, em telas largas, a maquete fica à direita para não disputar com o título
+  loop(canvas, tick, renderer, camera, (w, h) => {
+    if (interativo) return;
+    if (w / h > 1.15) camera.setViewOffset(w, h, -w * 0.2, -h * 0.02, w, h);
+    else camera.setViewOffset(w, h, 0, h * 0.18, w, h);
+  });
+  return { setData };
+}
+
+/* ------------------------------------------------------------------ */
+/* Câmera com visão computacional (Etapa 2)                             */
+/* ------------------------------------------------------------------ */
+function createCameraModel(canvas) {
+  const renderer = baseRenderer(canvas);
+  renderer.shadowMap.enabled = true;
+  const scene = new THREE.Scene();
+  const pmrem = new THREE.PMREMGenerator(renderer);
+  scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+  const camera = new THREE.PerspectiveCamera(30, 1, 0.1, 50);
+  camera.position.set(5.4, 3.6, 6.4); camera.lookAt(0, 1.2, 0);
+
+  scene.add(new THREE.HemisphereLight(0xaac4ff, 0x0b1020, 0.6));
+  const sol = new THREE.DirectionalLight(0xffffff, 2); sol.position.set(4, 8, 5); sol.castShadow = true; scene.add(sol);
+
+  const chao = new THREE.Mesh(new RoundedBoxGeometry(5.6, 0.2, 3.6, 3, 0.1), new THREE.MeshStandardMaterial({ color: 0x1a2131, roughness: 0.9 }));
+  chao.position.set(0.6, -0.1, 0.6); chao.receiveShadow = true; scene.add(chao);
+  const matVaga = new THREE.MeshStandardMaterial({ color: 0x323c54 });
+  const livres = [];
+  for (let i = 0; i < 6; i++) {
+    const v = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.01, 1.3), matVaga.clone());
+    v.position.set(-1.3 + i * 0.85, 0.01, 1.2); v.receiveShadow = true; scene.add(v); livres.push(v);
+    if (i % 3 !== 1) {
+      const car = new THREE.Group();
+      const b = new THREE.Mesh(new RoundedBoxGeometry(0.5, 0.22, 1.0, 3, 0.08), new THREE.MeshStandardMaterial({ color: PALETA_CARROS[i + 1], metalness: 0.5, roughness: 0.3 }));
+      const c = new THREE.Mesh(new RoundedBoxGeometry(0.42, 0.18, 0.5, 3, 0.07), new THREE.MeshStandardMaterial({ color: 0x0c1220, metalness: 0.9, roughness: 0.1 }));
+      b.position.y = 0.13; c.position.set(0, 0.3, -0.05); b.castShadow = c.castShadow = true;
+      car.add(b, c); car.position.copy(v.position); scene.add(car);
+    } else v.userData.livre = true;
+  }
+
+  const metal = new THREE.MeshStandardMaterial({ color: 0xdde3ee, metalness: 0.7, roughness: 0.28 });
+  const poste = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.09, 3.2, 24), metal);
+  poste.position.set(-1.9, 1.6, -0.6); poste.castShadow = true; scene.add(poste);
+  const braco = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.8, 16), metal);
+  braco.rotation.z = Math.PI / 2; braco.position.set(-1.55, 3.05, -0.6); scene.add(braco);
+
+  const cabeca = new THREE.Group(); cabeca.position.set(-1.15, 2.92, -0.6); scene.add(cabeca);
+  const corpo = new THREE.Mesh(new RoundedBoxGeometry(0.42, 0.34, 0.8, 4, 0.1), new THREE.MeshStandardMaterial({ color: 0xf2f4f8, roughness: 0.35, metalness: 0.1 }));
+  corpo.position.z = 0.25; corpo.castShadow = true; cabeca.add(corpo);
+  const viseira = new THREE.Mesh(new RoundedBoxGeometry(0.48, 0.06, 0.95, 3, 0.03), metal);
+  viseira.position.set(0, 0.2, 0.3); cabeca.add(viseira);
+  const lente = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 0.08, 32), new THREE.MeshStandardMaterial({ color: 0x050810, metalness: 1, roughness: 0.05 }));
+  lente.rotation.x = Math.PI / 2; lente.position.z = 0.67; cabeca.add(lente);
+  const led = new THREE.Mesh(new THREE.SphereGeometry(0.025, 12, 8), new THREE.MeshStandardMaterial({ color: 0xff3b3b, emissive: 0xff3b3b, emissiveIntensity: 3 }));
+  led.position.set(0.14, -0.08, 0.66); cabeca.add(led);
+
+  // Cone de visão
+  const cone = new THREE.Mesh(
+    new THREE.ConeGeometry(1.25, 3.4, 48, 1, true),
+    new THREE.MeshBasicMaterial({ color: 0x4c8dff, transparent: true, opacity: 0.13, side: THREE.DoubleSide, depthWrite: false, blending: THREE.AdditiveBlending })
+  );
+  cone.rotation.x = -Math.PI / 2; cone.position.z = 0.67 + 1.7;
+  const pivoCone = new THREE.Group(); pivoCone.add(cone); cabeca.add(pivoCone);
+  cabeca.rotation.x = 0.62;
+
+  function tick(dt, t) {
+    const yaw = REDUZIR_3D ? 0.55 : 0.55 + Math.sin(t * 0.6) * 0.55;
+    cabeca.rotation.y = yaw;
+    led.material.emissiveIntensity = REDUZIR_3D ? 2 : (Math.sin(t * 4) > 0 ? 3 : 0.3);
+    // vaga livre "detectada" acende em verde quando o cone passa
+    livres.forEach((v, i) => {
+      if (!v.userData.livre) return;
+      const ang = Math.atan2(v.position.x - cabeca.position.x, v.position.z - cabeca.position.z);
+      const perto = Math.abs(ang - yaw) < 0.28;
+      v.material.color.lerp(new THREE.Color(perto ? 0x34d399 : 0x323c54), 0.12);
+    });
+    renderer.render(scene, camera);
+  }
+  loop(canvas, tick, renderer, camera);
+}
+
+/* ------------------------------------------------------------------ */
+/* Moeda de pontos                                                      */
+/* ------------------------------------------------------------------ */
+function createCoin(canvas) {
+  const renderer = baseRenderer(canvas);
+  const scene = new THREE.Scene();
+  const pmrem = new THREE.PMREMGenerator(renderer);
+  scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.02).texture;
+  const camera = new THREE.PerspectiveCamera(28, 1, 0.1, 20);
+  camera.position.set(0, 0, 4.4);
+  scene.add(new THREE.DirectionalLight(0xffffff, 1.6).translateX(2).translateY(3).translateZ(4));
+
+  const ouro = new THREE.MeshStandardMaterial({ color: 0x4c8dff, metalness: 1, roughness: 0.22 });
+  const face = new THREE.MeshStandardMaterial({ color: 0x2f6fe8, metalness: 0.9, roughness: 0.35 });
+  const moeda = new THREE.Group(); scene.add(moeda);
+  const disco = new THREE.Mesh(new THREE.CylinderGeometry(0.9, 0.9, 0.16, 64), [ouro, face, face]);
+  disco.rotation.x = Math.PI / 2; moeda.add(disco);
+  const aro = new THREE.Mesh(new THREE.TorusGeometry(0.86, 0.055, 16, 80), ouro); moeda.add(aro);
+
+  const P = new THREE.Shape();
+  P.moveTo(-0.25, -0.45); P.lineTo(-0.25, 0.45); P.lineTo(0.06, 0.45);
+  P.absarc(0.06, 0.2, 0.25, Math.PI / 2, -Math.PI / 2, true);
+  P.lineTo(-0.08, -0.05); P.lineTo(-0.08, -0.45); P.closePath();
+  const furo = new THREE.Path();
+  furo.moveTo(-0.08, 0.3); furo.lineTo(0.05, 0.3); furo.absarc(0.05, 0.2, 0.1, Math.PI / 2, -Math.PI / 2, true); furo.lineTo(-0.08, 0.1); furo.closePath();
+  P.holes.push(furo);
+  const geoP = new THREE.ExtrudeGeometry(P, { depth: 0.05, bevelEnabled: true, bevelThickness: 0.015, bevelSize: 0.012, bevelSegments: 2 });
+  geoP.translate(0, 0, 0.08);
+  const p1 = new THREE.Mesh(geoP, ouro); moeda.add(p1);
+  const p2 = new THREE.Mesh(geoP, ouro); p2.rotation.y = Math.PI; moeda.add(p2);
+
+  let vel = 0.6;
+  function tick(dt) {
+    moeda.rotation.y += dt * (REDUZIR_3D ? 0 : vel);
+    vel += (0.6 - vel) * Math.min(1, dt * 1.5);
+    moeda.position.y = Math.sin(performance.now() / 900) * (REDUZIR_3D ? 0 : 0.05);
+    renderer.render(scene, camera);
+  }
+  loop(canvas, tick, renderer, camera);
+  return { burst: () => { vel = 14; } };
+}
+
+/* ===== js/app.js ===== */
+// Interface do Safepark v0.1. Lê a camada de dados, aplica as regras e desenha a tela.
+
+const $ = (s) => document.querySelector(s);
+const REDUZIR = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+let estado = criarEstado();
+let destino = null;
+let motorista = 'A';
+let cenaHero = null, cenaApp = null, moeda = null;
+
+/* ---------------- Labels 3D ---------------- */
+function criarLabels(container, clicavel) {
+  const map = {};
+  for (const r of REGIOES) {
+    const el = document.createElement(clicavel ? 'button' : 'div');
+    el.className = 'pin';
+    if (clicavel) { el.type = 'button'; el.addEventListener('click', () => escolher(r.id)); }
+    else el.setAttribute('aria-hidden', 'true');
+    container.appendChild(el);
+    map[r.id] = el;
+  }
+  return map;
+}
+const labelsHero = criarLabels($('#labels-hero'), false);
+const labelsApp = criarLabels($('#labels-app'), true);
+
+/* ---------------- Botões de destino ---------------- */
+const botoes = {};
+for (const r of REGIOES) {
+  const b = document.createElement('button');
+  b.type = 'button'; b.className = 'destino-btn'; b.setAttribute('aria-pressed', 'false');
+  b.addEventListener('click', () => escolher(r.id));
+  $('#botoes-destino').appendChild(b);
+  botoes[r.id] = b;
+}
+
+function escolher(id) { destino = id; render(); }
+
+/* ---------------- Contadores ---------------- */
+function contar(el, para, sufixo = '') {
+  const de = parseInt(el.textContent, 10);
+  const token = (el._tk = (el._tk || 0) + 1);
+  const final = () => { if (el._tk === token) el.textContent = para + sufixo; };
+  if (REDUZIR || isNaN(de) || de === para || document.hidden) return final();
+  const t0 = performance.now(), dur = 520;
+  const passo = (t) => {
+    if (el._tk !== token) return;
+    const k = Math.min(1, (t - t0) / dur), e = 1 - Math.pow(1 - k, 3);
+    el.textContent = Math.round(de + (para - de) * e) + sufixo;
+    if (k < 1) requestAnimationFrame(passo);
+  };
+  requestAnimationFrame(passo);
+  setTimeout(final, dur + 80); // garante o valor final mesmo se o rAF for pausado
+}
+
+/* ---------------- Render ---------------- */
+function render() {
+  const regs = estado.regioes.map(resumo);
+  const z = zonaAzul(estado);
+
+  for (const r of regs) {
+    for (const [map, extra] of [[labelsHero, ''], [labelsApp, '']]) {
+      const el = map[r.id];
+      el.dataset.c = r.classe;
+      el.innerHTML = `${r.nome}<b>${r.pct}% · ${r.classe}</b><small>${fmtVagas(r.ocupadas, r.total)} vagas${extra}</small>`;
+    }
+    labelsApp[r.id].setAttribute('aria-pressed', String(r.id === destino));
+    labelsApp[r.id].setAttribute('aria-label', `${r.nome}: ${r.pct}%, ${r.classe}, ${fmtVagas(r.ocupadas, r.total)} vagas ocupadas`);
+    const b = botoes[r.id];
+    b.innerHTML = `${r.nome}<small>${fmtVagas(r.ocupadas, r.total)} · ${r.pct}%</small>`;
+    b.setAttribute('aria-pressed', String(r.id === destino));
+  }
+
+  // Destino (RF02, RF03)
+  if (destino) {
+    const d = resumo(regiao(estado, destino));
+    $('#d-nome').textContent = `${d.nome} · ${d.apelido}`;
+    contar($('#d-pct'), d.pct, '%');
+    $('#d-classe').textContent = d.classe; $('#d-classe').dataset.c = d.classe;
+    $('#d-vagas').textContent = `${fmtVagas(d.ocupadas, d.total)} vagas ocupadas`;
+    $('#d-barra').style.width = d.pct + '%';
+    $('#d-barra').style.background = `var(--${d.classe.toLowerCase()})`;
+  }
+
+  // Zona Azul
+  contar($('#z-pct'), z.pct, '%');
+  $('#z-classe').textContent = z.classe; $('#z-classe').dataset.c = z.classe;
+  $('#z-vagas').textContent = fmtVagas(z.ocupadas, z.total);
+  $('#hero-zona').textContent = z.pct + '%';
+  $('#hero-zona-classe').textContent = z.classe;
+  $('#hero-zona-classe').style.color = `var(--${z.classe.toLowerCase()})`;
+
+  // Mais livres (RF04)
+  $('#lista-livres').innerHTML = maisLivres(estado).map((r, i) =>
+    `<li data-c="${r.classe}" class="${r.id === destino ? 'sel' : ''}"><span class="pos">${i + 1}º</span><span>${r.nome}</span><span class="v">${fmtVagas(r.ocupadas, r.total)}</span><span class="p">${r.pct}% ${r.classe}</span></li>`
+  ).join('');
+
+  // Motorista (RF06)
+  const m = estado.motoristas[motorista];
+  contar($('#m-pontos'), m.pontos);
+  const dias = diasGratis(m.pontos);
+  $('#m-dias').textContent = dias;
+  $('#m-dias-txt').textContent = dias === 1 ? 'dia grátis' : 'dias grátis';
+  $('#m-prog').style.width = (m.pontos % REGRAS.pontosPorDiaGratis) + '%';
+  document.querySelectorAll('.motorista-toggle button').forEach((b) => b.setAttribute('aria-checked', String(b.dataset.m === motorista)));
+
+  // Ação
+  const btn = $('#avisar');
+  btn.disabled = !destino;
+  btn.textContent = destino ? `Liberei uma vaga em ${regiao(estado, destino).nome}` : 'Liberei uma vaga';
+  $('#avisar-dica').textContent = destino ? `Você está como ${m.nome}. O aviso vale ${REGRAS.pontosPorAviso} pontos.` : 'Escolha acima a micro-região onde você liberou a vaga.';
+
+  // Feed (RF07)
+  const feed = $('#feed');
+  if (!estado.avisos.length) feed.innerHTML = '<li class="vazio">Nenhum aviso ainda. Seja o primeiro a liberar uma vaga.</li>';
+  else feed.innerHTML = estado.avisos.map((a) => {
+    const r = regiao(estado, a.regiao);
+    const podeDenunciar = a.status !== 'contestado';
+    return `<li><div>${estado.motoristas[a.autor].nome} liberou em ${r.nome}<small>Aviso #${a.id}</small></div>
+      <div style="display:flex;gap:8px;align-items:center"><span class="estado ${a.status === 'contestado' ? 'contestado' : ''}">${a.status === 'contestado' ? 'Contestado' : 'Válido'}</span>
+      ${podeDenunciar ? `<button class="denunciar" type="button" data-aviso="${a.id}">Denunciar</button>` : ''}</div></li>`;
+  }).join('');
+
+  cenaHero?.setData(estado.regioes, null);
+  cenaApp?.setData(estado.regioes, destino);
+}
+
+let toastT;
+function toast(res) {
+  const t = $('#toast');
+  t.textContent = res.msg; t.className = `toast on ${res.ok ? 'ok' : 'erro'}`;
+  clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('on'), 4200);
+}
+
+/* ---------------- Eventos ---------------- */
+$('#avisar').addEventListener('click', () => {
+  const res = avisarSaida(estado, motorista, destino);
+  toast(res);
+  if (res.ok) moeda?.burst();
+  render();
+});
+$('#feed').addEventListener('click', (e) => {
+  const b = e.target.closest('[data-aviso]'); if (!b) return;
+  const res = denunciar(estado, motorista, Number(b.dataset.aviso));
+  toast({ ...res, msg: res.ok ? res.msg : res.msg + (res.msg.includes('próprio') ? ' Troque para o outro motorista para testar a denúncia.' : '') });
+  render();
+});
+document.querySelectorAll('.motorista-toggle button').forEach((b) => b.addEventListener('click', () => { motorista = b.dataset.m; render(); }));
+$('#reiniciar').addEventListener('click', () => { estado = criarEstado(); destino = null; render(); toast({ ok: true, msg: 'Dados simulados reiniciados.' }); });
+
+/* ---------------- Critérios de aceitação ---------------- */
+const listaT = $('#lista-testes');
+listaT.innerHTML = CRITERIOS.map((c) => `
+  <li class="teste" id="t-${c.id}">
+    <p class="id">${c.id}<small>${c.ref}</small></p>
+    <dl><dt>Dado</dt><dd>${c.dado}</dd><dt>Quando</dt><dd>${c.quando}</dd><dt>Então</dt><dd>${c.entao}</dd><dt>Obtido</dt><dd class="obtido">—</dd></dl>
+    <p class="res">Aguardando</p>
+  </li>`).join('');
+
+$('#rodar').addEventListener('click', async () => {
+  const btn = $('#rodar'); btn.disabled = true;
+  let ok = 0;
+  for (const c of CRITERIOS) {
+    const li = $(`#t-${c.id}`);
+    li.classList.remove('passou', 'falhou');
+    li.querySelector('.res').textContent = 'Rodando…';
+  }
+  for (const c of CRITERIOS) {
+    await new Promise((r) => setTimeout(r, REDUZIR ? 0 : 140));
+    const li = $(`#t-${c.id}`);
+    let r;
+    try { r = c.run(); } catch (err) { r = { ok: false, obtido: 'Erro: ' + err.message }; }
+    if (r.ok) ok++;
+    li.classList.add(r.ok ? 'passou' : 'falhou');
+    li.querySelector('.obtido').textContent = r.obtido;
+    li.querySelector('.res').textContent = r.ok ? 'Passou' : 'Falhou';
+  }
+  $('#placar').textContent = `${ok} de ${CRITERIOS.length} cenários passaram`;
+  $('#placar').style.color = ok === CRITERIOS.length ? 'var(--livre)' : 'var(--cheia)';
+  btn.disabled = false; btn.textContent = 'Rodar de novo';
+});
+
+render();
+
+/* ---------------- 3D (carrega depois; a página funciona sem ele) ---------------- */
+Promise.resolve().then(() => {
+  try {
+    cenaHero = createCity($('#cena-hero'), { regioes: estado.regioes, labels: labelsHero });
+    cenaApp = createCity($('#cena-app'), { regioes: estado.regioes, labels: labelsApp, interativo: true, onPick: escolher });
+    createCameraModel($('#cena-camera'));
+    moeda = createCoin($('#cena-moeda'));
+    render();
+  } catch (err) {
+    console.warn('3D indisponível', err);
+    document.querySelectorAll('.pin').forEach((p) => (p.style.display = 'none'));
+  }
+}).catch((err) => console.warn('Falha ao carregar o 3D', err));
+
+/* ---------------- Movimento ---------------- */
+function animarEntrada() {
+  const gsap = window.gsap, ST = window.ScrollTrigger;
+  if (!gsap || REDUZIR) return;
+  gsap.registerPlugin(ST);
+  document.documentElement.classList.add('js-on');
+  gsap.fromTo('[data-intro]', { y: 28, opacity: 0 }, { y: 0, opacity: 1, duration: 0.9, ease: 'power3.out', stagger: 0.09, delay: 0.1 });
+  const io = new IntersectionObserver((ents) => {
+    let i = 0;
+    for (const en of ents) {
+      if (!en.isIntersecting) continue;
+      en.target.style.transitionDelay = `${(i++) * 70}ms`;
+      en.target.classList.add('visto');
+      io.unobserve(en.target);
+    }
+  }, { rootMargin: '0px 0px -8% 0px' });
+  document.querySelectorAll('[data-reveal]').forEach((el) => io.observe(el));
+  // a maquete do hero recua levemente ao rolar
+  gsap.to('.hero-3d', { yPercent: 12, opacity: 0.35, ease: 'none', scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom top', scrub: true } });
+}
+if (document.readyState === 'complete') animarEntrada();
+else window.addEventListener('load', animarEntrada);
+
+</script>
+</body>
+</html>

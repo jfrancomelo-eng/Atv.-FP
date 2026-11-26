@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Safepark · Inteligência de vagas na Zona Azul</title>
+  <meta name="description" content="Safepark mostra, antes de você sair de casa, a ocupação da Zona Azul do Centro do Recife por micro-região. Projeto AV2 de ADM Tech na CESAR School.">
+  <meta property="og:title" content="Safepark · Saiba se tem vaga antes de sair de casa">
+  <meta property="og:description" content="Ocupação da Zona Azul do Centro do Recife por micro-região, mantida pelos próprios motoristas.">
+  <meta property="og:type" content="website">
+  <meta name="theme-color" content="#070b16">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%234c8dff'/%3E%3Cpath d='M22 50V14h13a11 11 0 0 1 0 22h-6v14z M29 21v8h6a4 4 0 0 0 0-8z' fill='%23070b16'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Hanken+Grotesk:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+  <script type="importmap">
+    { "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+    } }
+  </script>
+</head>
+<body>
+  <a class="pular" href="#app">Pular para o aplicativo</a>
+
+  <header class="nav" id="topo">
+    <a class="marca" href="#topo" aria-label="Safepark, início">
+      <span class="marca-p" aria-hidden="true">P</span> Safepark
+    </a>
+    <nav aria-label="Seções">
+      <a href="#problema">Problema</a>
+      <a href="#como">Como funciona</a>
+      <a href="#regras">Regras</a>
+      <a href="#testes">Testes</a>
+      <a href="#roadmap">Roadmap</a>
+    </nav>
+    <a class="btn btn-sm" href="#app">Abrir a v0.1</a>
+  </header>
+
+  <main>
+    <!-- HERO -->
+    <section class="hero" aria-labelledby="h1">
+      <div class="hero-3d" aria-hidden="true">
+        <canvas id="cena-hero"></canvas>
+        <div class="labels" id="labels-hero"></div>
+      </div>
+      <div class="hero-txt">
+        <p class="hero-kicker" data-intro>Centro do Recife, Zona Azul</p>
+        <h1 id="h1" data-intro>Saiba se tem vaga <em>antes</em> de sair de casa.</h1>
+        <p class="lead" data-intro>O Safepark mostra a ocupação da Zona Azul do Centro do Recife por micro-região. Quem mantém o mapa atualizado são os próprios motoristas, e quem colabora ganha dias grátis.</p>
+        <div class="cta" data-intro>
+          <a class="btn" href="#app">Testar a v0.1</a>
+          <a class="btn btn-ghost" href="#como">Ver como funciona</a>
+        </div>
+        <dl class="hero-stats" data-intro>
+          <div><dt>Zona Azul agora</dt><dd><span id="hero-zona">56%</span><small id="hero-zona-classe">Livre</small></dd></div>
+          <div><dt>Vagas no Centro</dt><dd>3.500+</dd></div>
+          <div><dt>Congestionamento</dt><dd>64,7%</dd></div>
+        </dl>
+      </div>
+      <p class="selo-simulado hero-selo"><span aria-hidden="true">●</span> Dados simulados da v0.1</p>
+    </section>
+
+    <!-- PROBLEMA -->
+    <section class="secao" id="problema" aria-labelledby="t-problema">
+      <div class="secao-cab" data-reveal>
+        <p class="eyebrow">01 · O problema</p>
+        <h2 id="t-problema">Rodar às cegas atrás de vaga piora o trânsito de todo mundo.</h2>
+      </div>
+      <div class="problema-grid">
+        <article class="cartao" data-reveal>
+          <p class="num">64,7%</p>
+          <p>de congestionamento registrado no Recife. Parte dele é gente dando voltas no quarteirão procurando onde parar.</p>
+        </article>
+        <article class="cartao" data-reveal>
+          <p class="num">3.500+</p>
+          <p>vagas de Zona Azul no Centro, mais as garagens. Nenhuma informa, antes de você sair, se está cheia.</p>
+        </article>
+        <article class="cartao" data-reveal>
+          <p class="num">0</p>
+          <p>informação antes da saída. Estudantes da CESAR School e trabalhadores só descobrem a lotação quando já estão lá.</p>
+        </article>
+      </div>
+      <blockquote class="historia" data-reveal>
+        <p>“Como motorista que vai de carro ao Centro do Recife, quero informar meu destino antes de sair de casa e ver a ocupação da Zona Azul e as micro-regiões mais livres, para decidir onde procurar vaga sem rodar às cegas.”</p>
+        <cite>História de usuário principal</cite>
+      </blockquote>
+    </section>
+
+    <!-- COMO FUNCIONA -->
+    <section class="secao" id="como" aria-labelledby="t-como">
+      <div class="secao-cab" data-reveal>
+        <p class="eyebrow">02 · Fluxo principal</p>
+        <h2 id="t-como">Cinco passos, uma tela só.</h2>
+      </div>
+      <ol class="passos">
+        <li data-reveal><span>1</span><h3>Abre antes de sair</h3><p>O motorista abre o Safepark ainda em casa.</p></li>
+        <li data-reveal><span>2</span><h3>Escolhe o destino</h3><p>Uma das quatro micro-regiões do Centro.</p></li>
+        <li data-reveal><span>3</span><h3>Confere a ocupação</h3><p>% do destino e da Zona Azul, com a classificação em texto.</p></li>
+        <li data-reveal><span>4</span><h3>Vê as mais livres</h3><p>Lista da menor para a maior ocupação.</p></li>
+        <li data-reveal><span>5</span><h3>Avisa e ganha pontos</h3><p>Ao liberar a vaga, avisa a saída. Aviso falso pode ser denunciado.</p></li>
+      </ol>
+    </section>
+
+    <!-- APP -->
+    <section class="secao app" id="app" aria-labelledby="t-app">
+      <div class="secao-cab" data-reveal>
+        <p class="eyebrow">03 · Aplicativo v0.1</p>
+        <h2 id="t-app">Experimente agora.</h2>
+        <p class="sub">Toque em uma micro-região no mapa ou nos botões. Gire o mapa arrastando.</p>
+      </div>
+
+      <div class="aviso-simulado" role="note">
+        <strong>Dados simulados.</strong> Os números de vagas e ocupação desta versão são fictícios e não representam o inventário real do Recife.
+        <button class="link" id="reiniciar" type="button">Reiniciar dados</button>
+      </div>
+
+      <div class="app-grid">
+        <div class="mapa" data-reveal>
+          <canvas id="cena-app" aria-label="Mapa 3D esquemático das micro-regiões do Centro do Recife"></canvas>
+          <div class="labels" id="labels-app"></div>
+          <p class="mapa-legenda"><span class="dot livre"></span>Livre &lt; 60% <span class="dot moderada"></span>Moderada 60–84% <span class="dot cheia"></span>Cheia ≥ 85% · 1 carro = 1 vaga ocupada</p>
+        </div>
+
+        <div class="painel">
+          <fieldset class="destinos">
+            <legend>Escolha o destino</legend>
+            <div id="botoes-destino" class="destino-lista"></div>
+          </fieldset>
+
+          <div class="leitura" aria-live="polite">
+            <div class="leitura-destino">
+              <p class="rotulo">Destino</p>
+              <p class="destino-nome" id="d-nome">Escolha uma micro-região</p>
+              <p class="destino-num"><span id="d-pct">--</span><span class="badge" id="d-classe">—</span></p>
+              <p class="destino-vagas" id="d-vagas">&nbsp;</p>
+              <div class="barra" aria-hidden="true"><i id="d-barra"></i><b style="left:60%"></b><b style="left:85%"></b></div>
+            </div>
+            <div class="leitura-zona">
+              <p class="rotulo">Zona Azul inteira</p>
+              <p class="zona-num"><span id="z-pct">56%</span> <span class="badge" id="z-classe">Livre</span></p>
+              <p class="destino-vagas" id="z-vagas">337 de 600</p>
+            </div>
+          </div>
+
+          <div class="livres">
+            <p class="rotulo">Mais livres agora</p>
+            <ol id="lista-livres"></ol>
+          </div>
+        </div>
+      </div>
+
+      <div class="colab">
+        <div class="carteira">
+          <canvas id="cena-moeda" aria-hidden="true"></canvas>
+          <div>
+            <div class="motorista-toggle" role="radiogroup" aria-label="Quem está usando">
+              <button type="button" role="radio" aria-checked="true" data-m="A">Motorista A</button>
+              <button type="button" role="radio" aria-checked="false" data-m="B">Motorista B</button>
+            </div>
+            <p class="pontos"><span id="m-pontos">0</span> pontos</p>
+            <p class="dias"><span id="m-dias">0</span> <span id="m-dias-txt">dias grátis</span> de Zona Azul</p>
+            <div class="progresso" aria-hidden="true"><i id="m-prog"></i></div>
+            <p class="dica">Cada aviso vale 10 pontos. A cada 100 pontos, 1 dia grátis.</p>
+          </div>
+        </div>
+
+        <div class="acoes">
+          <button class="btn btn-grande" id="avisar" type="button">Liberei uma vaga</button>
+          <p class="dica" id="avisar-dica">Escolha o destino onde você liberou a vaga.</p>
+          <p class="toast" id="toast" role="status" aria-live="polite"></p>
+        </div>
+
+        <div class="feed">
+          <p class="rotulo">Avisos de saída recentes</p>
+          <ul id="feed"><li class="vazio">Nenhum aviso ainda. Seja o primeiro a liberar uma vaga.</li></ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- REGRAS -->
+    <section class="secao" id="regras" aria-labelledby="t-regras">
+      <div class="secao-cab" data-reveal>
+        <p class="eyebrow">04 · Regras de negócio</p>
+        <h2 id="t-regras">Os limites pertencem à faixa mais ocupada.</h2>
+        <p class="sub">60% já é Moderada. 85% já é Cheia. A classificação aparece em texto, nunca só pela cor.</p>
+      </div>
+      <div class="escala" data-reveal aria-hidden="true">
+        <div class="faixa livre" style="flex:60"><span>Livre</span><small>0–59%</small></div>
+        <div class="faixa moderada" style="flex:25"><span>Moderada</span><small>60–84%</small></div>
+        <div class="faixa cheia" style="flex:16"><span>Cheia</span><small>85–100%</small></div>
+      </div>
+      <div class="regras-grid">
+        <article data-reveal><b>RN01</b><p>Quatro micro-regiões fixas do Centro, com dados simulados.</p></article>
+        <article data-reveal><b>RN02</b><p>Ocupação = ocupadas ÷ totais × 100, arredondada ao inteiro.</p></article>
+        <article data-reveal><b>RN03</b><p>Zona Azul = soma das ocupadas ÷ soma das totais. Hoje: 337 de 600 = 56%.</p></article>
+        <article data-reveal><b>RN04</b><p>Livre abaixo de 60%, Moderada de 60% a 84%, Cheia a partir de 85%.</p></article>
+        <article data-reveal><b>RN05</b><p>Mais livres primeiro. Empate vai em ordem alfabética.</p></article>
+        <article data-reveal><b>RN06</b><p>Aviso de saída tira 1 vaga ocupada. Sem vaga ocupada, é recusado.</p></article>
+        <article data-reveal><b>RN07</b><p>Aviso válido = +10 pontos. 100 pontos = 1 dia grátis.</p></article>
+        <article data-reveal><b>RN08</b><p>Só se denuncia aviso de outro motorista, uma vez por aviso.</p></article>
+        <article data-reveal><b>RN09</b><p>Denúncia aceita: vaga volta a ocupada e o autor perde 30 pontos. Nunca abaixo de 0.</p></article>
+      </div>
+    </section>
+
+    <!-- TESTES -->
+    <section class="secao" id="testes" aria-labelledby="t-testes">
+      <div class="secao-cab" data-reveal>
+        <p class="eyebrow">05 · Critérios de aceitação</p>
+        <h2 id="t-testes">Dez cenários, conferidos ao vivo.</h2>
+        <p class="sub">Cada cenário roda contra o mesmo código do aplicativo, num estado limpo.</p>
+      </div>
+      <div class="testes-topo">
+        <button class="btn" id="rodar" type="button">Rodar CA01 a CA10</button>
+        <p id="placar" class="placar" aria-live="polite"></p>
+      </div>
+      <ol class="testes" id="lista-testes"></ol>
+    </section>
+
+    <!-- ROADMAP -->
+    <section class="secao" id="roadmap" aria-labelledby="t-roadmap">
+      <div class="secao-cab" data-reveal>
+        <p class="eyebrow">06 · Roadmap</p>
+        <h2 id="t-roadmap">Primeiro os motoristas. Depois as câmeras.</h2>
+      </div>
+      <div class="roadmap">
+        <article class="etapa atual" data-reveal>
+          <p class="etapa-tag">Etapa 1 · agora</p>
+          <h3>MVP web colaborativo</h3>
+          <ul>
+            <li>Mapa esquemático com quatro micro-regiões</li>
+            <li>Destino, ocupação, classificação e lista das mais livres</li>
+            <li>Aviso de saída com pontos e dias grátis</li>
+            <li>Denúncia de vaga ocupada com penalidade</li>
+          </ul>
+          <p class="fora"><b>Fora da v0.1:</b> câmeras, GPS e rotas, login e banco de dados, pagamento real e integração com o órgão de trânsito.</p>
+          <p class="tec">HTML, CSS e JavaScript · GitHub Pages · dados em arquivo separado da interface</p>
+        </article>
+        <article class="etapa futura" data-reveal>
+          <div class="cam3d"><canvas id="cena-camera" aria-hidden="true"></canvas></div>
+          <p class="etapa-tag">Etapa 2 · após validação</p>
+          <h3>Câmeras com visão computacional</h3>
+          <p>Câmeras estratégicas detectam vagas livres em tempo real. Como a ocupação já vive numa camada de dados com campo de origem (RF08), a mesma tela passa a ser alimentada pela nova fonte, sem refazer nada.</p>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <footer class="rodape">
+    <div class="rodape-marca">
+      <img src="assets/cesar-school.png" alt="CESAR School" width="96" height="84" loading="lazy">
+      <div>
+        <p><b>Safepark</b> · Inteligência de Vagas na Zona Azul</p>
+        <p>AV2 · Entrega 1 · ADM Tech · Docente José Adeilmo Nunes Barbosa Junior</p>
+        <p>Lente 8 · Mobilidade Inteligente &amp; Programação</p>
+      </div>
+    </div>
+    <p class="rodape-nota">Todos os dados de vagas, ocupação e pontos desta página são simulados para a v0.1.</p>
+  </footer>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
