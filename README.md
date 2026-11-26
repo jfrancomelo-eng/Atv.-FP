@@ -11,7 +11,7 @@
 
 | Parte | Tecnologia |
 |---|---|
-| Rolagem animada | GSAP 3.12 + ScrollTrigger |
+| Rolagem animada | GSAP 3.12 + ScrollTrigger e Lenis (rolagem suave) |
 | 3D | Three.js 0.160: o corredor da Conde da Boa Vista e o celular com o boletim |
 | Calculadora | Testa a regra dos 60 minutos (RN08) com o mesmo cálculo do programa Python |
 | Fotos | `docs/assets/`, imagens do corredor |
