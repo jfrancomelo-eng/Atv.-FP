@@ -3,6 +3,21 @@
 > 🌐 **Site do projeto:** **[jfrancomelo-eng.github.io/Atv.-FP](https://jfrancomelo-eng.github.io/Atv.-FP/)**  
 > 📄 **Documento da entrega:** [docs/AV2_Entrega_1_Conde_Avisa.docx](docs/AV2_Entrega_1_Conde_Avisa.docx)
 
+## Sobre o site
+
+**Conceito.** O site apresenta o Conde Avisa para quem não conhece o projeto: o problema (avisos de obra, desvio e chuva espalhados entre Grande Recife, CTTU, CBTU e APAC), a solução (um canal único que avisa **antes** de o passageiro sair de casa) e a regra principal, a antecedência útil de 60 minutos antes do pico. A frase-guia é "Avisa antes de você sair".
+
+**Base.** Página estática em `docs/`, publicada pelo GitHub Pages, com HTML, CSS e JavaScript puros, sem build:
+
+| Parte | Tecnologia |
+|---|---|
+| Rolagem animada | GSAP 3.12 + ScrollTrigger |
+| 3D | Three.js 0.160: o corredor da Conde da Boa Vista e o celular com o boletim |
+| Calculadora | Testa a regra dos 60 minutos (RN08) com o mesmo cálculo do programa Python |
+| Fotos | `docs/assets/`, imagens do corredor |
+
+O programa do plantonista (Python, na raiz do repositório) é a v0.1 descrita abaixo. O site é a vitrine e a explicação do projeto.
+
 ## Definições e planejamento da v0.1
 
 **Disciplina:** AdmTech · **Docente:** José Adeilmo Nunes Barbosa Junior
